@@ -1,0 +1,230 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mason 生字練習</title>
+    <style>
+        :root { --primary: #007bff; --success: #28a745; --danger: #dc3545; --light: #f4f7f6; --dark: #333; }
+        body { font-family: 'Segoe UI', system-ui, sans-serif; background-color: var(--light); display: flex; justify-content: center; align-items: center; min-height: 100vh; margin: 0; padding: 20px; }
+        .container { background: white; padding: 2.5rem; border-radius: 16px; box-shadow: 0 10px 30px rgba(0,0,0,0.1); text-align: center; max-width: 500px; width: 100%; }
+        h1 { color: var(--dark); margin-top: 0; margin-bottom: 20px; }
+        .stats-bar { background: #e9ecef; padding: 10px; border-radius: 8px; margin-bottom: 20px; font-size: 0.9rem; color: #555; display: flex; justify-content: space-around; }
+        .stats-bar span b { color: var(--primary); }
+        .question { font-size: 2rem; color: var(--primary); margin: 1rem 0; font-weight: bold; }
+        input { width: 100%; padding: 12px; border: 2px solid #ddd; border-radius: 8px; font-size: 1.1rem; box-sizing: border-box; outline: none; transition: border-color 0.3s; }
+        input:focus { border-color: var(--primary); }
+        input.correct-input { border-color: var(--success); background-color: #d4edda; }
+        input.wrong-input { border-color: var(--danger); background-color: #f8d7da; }
+        .btn-group { margin-top: 1.5rem; display: flex; gap: 10px; justify-content: center; flex-wrap: wrap; }
+        button { padding: 10px 24px; border: none; border-radius: 8px; cursor: pointer; font-size: 1rem; font-weight: bold; transition: transform 0.1s, background 0.2s; }
+        .btn-check { background-color: var(--success); color: white; }
+        .btn-next { background-color: var(--primary); color: white; display: none; }
+        .btn-renew { background-color: #6c757d; color: white; font-size: 0.8rem; }
+        #feedback { margin-top: 1rem; font-weight: bold; min-height: 1.2rem; }
+        .correct { color: var(--success); }
+        .wrong { color: var(--danger); }
+        #loading-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(255,255,255,0.8); display: flex; justify-content: center; align-items: center; z-index: 1000; }
+    </style>
+</head>
+<body>
+
+<div id="loading-overlay">讀取 Mason 生字表中...</div>
+
+<div class="container">
+    <h1>Mason 生字練習 ✍️</h1>
+    
+    <div class="stats-bar">
+        <span>剩餘未熟練: <b id="remaining-count">0</b></span>
+        <span>本輪進度: <b id="round-progress">0/20</b></span>
+    </div>
+
+    <div id="start-box" style="display:none;">
+        <h2>🎉 太強了！全部背完了！</h2>
+        <p>點擊下方按鈕重新從雲端同步所有單字。</p>
+        <button class="btn-renew" onclick="fetchFromCloud()">重新開始全部挑戰</button>
+    </div>
+
+    <div id="quiz-box">
+        <p>請翻譯以下單字：</p>
+        <div class="question" id="chinese-word">---</div>
+        <input type="text" id="answer-input" placeholder="在此輸入英文..." autocomplete="off">
+        <div id="feedback"></div>
+        
+        <div class="btn-group">
+            <button class="btn-check" id="check-btn" onclick="checkAnswer()">檢查答案</button>
+            <button class="btn-next" id="next-btn" onclick="nextQuestion()">下一題 👉</button>
+        </div>
+        <div style="margin-top:25px;">
+            <button class="btn-renew" onclick="fetchFromCloud()">同步雲端最新單字 (Renew)</button>
+        </div>
+    </div>
+
+    <div id="complete-box" style="display:none;">
+        <h2>本輪結束！👏</h2>
+        <p id="complete-msg"></p>
+        <button class="btn-next" style="display:inline-block;" onclick="startNewRound()">開始下一輪</button>
+    </div>
+</div>
+
+<script>
+    // 您的新 Google Sheets CSV 網址
+    const CSV_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vRLUl6AnBghIZxCAqIdYE5pKdyU7b2rioFXCoIXHPSTWBPozvpYI6UegDn_n7gPfNfc5uwnm3AiOQJd/pub?gid=0&single=true&output=csv';
+
+    let unlearnedWords = [];
+    let currentRoundPool = [];
+    let currentIndex = 0;
+    let isAnswered = false;
+
+    const ui = {
+        quiz: document.getElementById('quiz-box'),
+        start: document.getElementById('start-box'),
+        complete: document.getElementById('complete-box'),
+        question: document.getElementById('chinese-word'),
+        input: document.getElementById('answer-input'),
+        feedback: document.getElementById('feedback'),
+        checkBtn: document.getElementById('check-btn'),
+        nextBtn: document.getElementById('next-btn'),
+        remain: document.getElementById('remaining-count'),
+        progress: document.getElementById('round-progress'),
+        loading: document.getElementById('loading-overlay')
+    };
+
+    // 1. 從雲端抓取 CSV 並解析
+    async function fetchFromCloud() {
+        ui.loading.style.display = 'flex';
+        try {
+            const response = await fetch(CSV_URL);
+            const csvText = await response.text();
+            
+            // 解析 CSV
+            const lines = csvText.split(/\r?\n/);
+            const words = [];
+            
+            // 從第一行開始抓 (i=0)，如果您的表有標題列，請改為 i=1
+            for (let i = 0; i < lines.length; i++) {
+                const line = lines[i].split(',');
+                if (line.length >= 2 && line[0].trim() !== "") {
+                    words.push({
+                        en: line[0].trim(),
+                        ch: line[1].trim()
+                    });
+                }
+            }
+
+            if (words.length === 0) throw new Error("單字表解析失敗或為空");
+
+            unlearnedWords = words;
+            saveToLocal();
+            startNewRound();
+        } catch (error) {
+            alert("抓取單字失敗！請確認 Google Sheets 已經『發佈到網路』並選擇『CSV』格式。");
+            console.error(error);
+        } finally {
+            ui.loading.style.display = 'none';
+        }
+    }
+
+    function init() {
+        // 使用獨立的 Key 避免與之前的版本混淆
+        const savedData = localStorage.getItem('mason_vocab_data');
+        if (savedData) {
+            unlearnedWords = JSON.parse(savedData);
+            ui.loading.style.display = 'none';
+            if (unlearnedWords.length === 0) {
+                showBox('start');
+            } else {
+                startNewRound();
+            }
+        } else {
+            fetchFromCloud();
+        }
+    }
+
+    function saveToLocal() {
+        localStorage.setItem('mason_vocab_data', JSON.stringify(unlearnedWords));
+        ui.remain.innerText = unlearnedWords.length;
+    }
+
+    function startNewRound() {
+        if (unlearnedWords.length === 0) {
+            showBox('start');
+            return;
+        }
+        // 隨機挑選最多 20 題
+        const shuffled = [...unlearnedWords].sort(() => 0.5 - Math.random());
+        currentRoundPool = shuffled.slice(0, 20);
+        currentIndex = 0;
+        showBox('quiz');
+        loadQuestion();
+    }
+
+    function loadQuestion() {
+        isAnswered = false;
+        const currentWord = currentRoundPool[currentIndex];
+        ui.question.innerText = currentWord.ch;
+        ui.input.value = "";
+        ui.input.className = "";
+        ui.input.disabled = false;
+        ui.feedback.innerText = "";
+        ui.checkBtn.style.display = "inline-block";
+        ui.nextBtn.style.display = "none";
+        ui.progress.innerText = `${currentIndex + 1}/${currentRoundPool.length}`;
+        ui.input.focus();
+    }
+
+    function checkAnswer() {
+        if (isAnswered) return;
+        const userInput = ui.input.value.trim().toLowerCase();
+        const correctAnswer = currentRoundPool[currentIndex].en.toLowerCase();
+
+        if (!userInput) return;
+
+        isAnswered = true;
+        ui.input.disabled = true;
+        ui.checkBtn.style.display = "none";
+        ui.nextBtn.style.display = "inline-block";
+
+        if (userInput === correctAnswer) {
+            ui.feedback.innerText = "答對了！✨";
+            ui.feedback.className = "correct";
+            ui.input.classList.add('correct-input');
+            // 從清單移除，下次不再出現
+            unlearnedWords = unlearnedWords.filter(w => w.en.toLowerCase() !== correctAnswer);
+            saveToLocal();
+        } else {
+            ui.feedback.innerText = `記起來：${currentRoundPool[currentIndex].en}`;
+            ui.feedback.className = "wrong";
+            ui.input.classList.add('wrong-input');
+        }
+        ui.nextBtn.focus();
+    }
+
+    function nextQuestion() {
+        currentIndex++;
+        if (currentIndex < currentRoundPool.length) {
+            loadQuestion();
+        } else {
+            showBox(unlearnedWords.length === 0 ? 'start' : 'complete');
+            document.getElementById('complete-msg').innerText = `本輪結束，剩餘未背熟單字：${unlearnedWords.length}`;
+        }
+    }
+
+    function showBox(name) {
+        ui.quiz.style.display = name === 'quiz' ? 'block' : 'none';
+        ui.start.style.display = name === 'start' ? 'block' : 'none';
+        ui.complete.style.display = name === 'complete' ? 'block' : 'none';
+    }
+
+    ui.input.addEventListener('keypress', (e) => { 
+        if(e.key==='Enter') {
+            if(!isAnswered) checkAnswer();
+            else nextQuestion();
+        }
+    });
+    
+    init();
+</script>
+
+</body>
+</html>
