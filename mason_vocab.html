@@ -590,6 +590,7 @@ function chkM3(){
       speak(cur.en);
       document.getElementById('m3-speak').className='speak-btn show';
       fb.className='fb show bad';fb.textContent='✗ 拼錯了！先聽聽發音，再試一次！';
+      wrongs.push(cur);recErr(cur.row);
     }else if(m3tries===2){
       speak(cur.en);
       fb.className='fb show bad';fb.textContent='✗ 再試一次！你可以的 💪';
