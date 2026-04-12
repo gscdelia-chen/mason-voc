@@ -522,7 +522,7 @@ function chkM1(){
     if(m1tries===1){
       speak(cur.en);
       document.getElementById('m1-speak').className='speak-btn show';
-      fb.className='fb show bad';fb.textContent='✗ 拼錯了！先聽聽發音，再試一次！ (row:'+cur.row+')';
+      fb.className='fb show bad';fb.textContent='✗ 拼錯了！先聽聽發音，再試一次！';
       wrongs.push(cur);recErr(cur.row);
     }else if(m1tries===2){
       speak(cur.en);
@@ -703,35 +703,19 @@ async function ldM4(){
   }
 }
 
-function generateSentence(word){
-  return new Promise((resolve,reject)=>{
-    const cbName='_cb'+Date.now();
-    const script=document.createElement('script');
-    const timer=setTimeout(()=>{
-      delete window[cbName];
-      document.body.removeChild(script);
-      reject(new Error('timeout'));
-    },15000);
-    window[cbName]=function(data){
-      clearTimeout(timer);
-      delete window[cbName];
-      document.body.removeChild(script);
-      const text=(data.sentence||'').trim();
-      if(!text){reject(new Error('empty'));return;}
-      resolve(text);
-    };
-    const url=SCRIPT_URL
-      +'?word='+encodeURIComponent(word.en)
-      +'&zh='+encodeURIComponent(word.zh||'')
-      +'&callback='+cbName;
-    script.src=url;
-    script.onerror=()=>{
-      clearTimeout(timer);
-      delete window[cbName];
-      reject(new Error('script error'));
-    };
-    document.body.appendChild(script);
-  });
+async function generateSentence(word){
+  const url=SCRIPT_URL
+    +'?word='+encodeURIComponent(word.en)
+    +'&zh='+encodeURIComponent(word.zh||'');
+  // fetch with no-cors can't read response
+  // Use a proxy approach: iframe postMessage or just fetch normally
+  // GAS doGet with proper deployment should allow CORS
+  const res=await fetch(url);
+  if(!res.ok) throw new Error('fetch error '+res.status);
+  const data=await res.json();
+  const text=(data.sentence||'').trim();
+  if(!text) throw new Error('empty sentence');
+  return text;
 }
 
 function pickM4(btn,correct,answer,sentEl,fullSentence){
@@ -792,24 +776,15 @@ function speak(t){
 // ── Error Recording ──
 function recErr(rowNum){
   const today=new Date().toISOString().slice(0,10);
-  const cbName='_errcb'+Date.now();
-  const script=document.createElement('script');
-  window[cbName]=function(){
-    delete window[cbName];
-    if(document.body.contains(script))document.body.removeChild(script);
-    document.getElementById('m1sync').style.display='block';
-  };
-  script.src=SCRIPT_URL
+  // Use GET with no-cors — request reaches GAS even without response
+  const url=SCRIPT_URL
     +'?action=recordError'
     +'&rowNum='+rowNum
     +'&date='+today
-    +'&sheetName='+encodeURIComponent('練習範圍')
-    +'&callback='+cbName;
-  script.onerror=()=>{
-    delete window[cbName];
-    if(document.body.contains(script))document.body.removeChild(script);
-  };
-  document.body.appendChild(script);
+    +'&sheetName='+encodeURIComponent('練習範圍');
+  fetch(url,{mode:'no-cors'})
+    .then(()=>{ document.getElementById('m1sync').style.display='block'; })
+    .catch(e=>console.warn('recErr:',e));
 }
 </script>
 </body>
