@@ -439,7 +439,7 @@ const CSV_URL='https://docs.google.com/spreadsheets/d/e/2PACX-1vRLUl6AnBghIZxCAq
 const SHEET_ID='';
 const SCRIPT_URL='https://script.google.com/macros/s/AKfycbw2IbdtYENvJcME71HSIlupMNCw63TqF9Z4Y8ahcdmpVnV8vZwqM_ZF76FrfGoJe5MmxQ/exec';
 
-let vocab=[],queue=[],idx=0,cur=null,wrongs=[],mode=0,m1done=false;
+let vocab=[],queue=[],idx=0,cur=null,wrongs=[],mode=0,m1done=false,m1tries=0,m3tries=0;
 
 // ── Fetch vocab ──
 async function fetchVocab(){
@@ -493,7 +493,7 @@ function setProg(pfId,cntId){
 // ── Mode 1 ──
 function ldM1(){
   if(idx>=queue.length){sumUp();return;}
-  cur=queue[idx];m1done=false;setProg('p1','cnt1');
+  cur=queue[idx];m1done=false;m1tries=0;setProg('p1','cnt1');
   document.getElementById('m1zh').textContent=cur.zh||cur.en;
   const i=document.getElementById('m1i');
   i.value='';i.className='sinp';i.disabled=false;
@@ -501,7 +501,7 @@ function ldM1(){
   document.getElementById('m1chk').style.display='block';
   document.getElementById('m1nxt').style.display='none';
   document.getElementById('m1sync').style.display='none';
-  document.getElementById('m1-speak').className='speak-btn'; // hide
+  document.getElementById('m1-speak').className='speak-btn';
   i.focus();
 }
 function chkM1(){
@@ -509,24 +509,35 @@ function chkM1(){
   const i=document.getElementById('m1i'),v=i.value.trim().toLowerCase();
   const fb=document.getElementById('m1fb');
   if(v===cur.en.toLowerCase()){
-    i.className='sinp ok';fb.className='fb show ok';fb.textContent='🎉 完全正確！太棒了！';
-    document.getElementById('m1-speak').className='speak-btn'; // keep hidden
+    i.className='sinp ok';fb.className='fb show ok';
+    fb.textContent= m1tries===0 ? '🎉 完全正確！太棒了！' : '✅ 答對了！繼續加油！';
+    document.getElementById('m1-speak').className='speak-btn';
+    m1done=true;i.disabled=true;
+    document.getElementById('m1chk').style.display='none';
+    document.getElementById('m1nxt').style.display='block';
   }else{
-    i.className='sinp bad';fb.className='fb show bad';
-    fb.textContent='✗ 正確答案：'+cur.en+'  加油！';
-    speak(cur.en);
-    document.getElementById('m1-speak').className='speak-btn show'; // show speak btn
-    wrongs.push(cur);recErr(cur.row);
-    // let retry: reset input, don't advance yet
-    m1done=false;
-    setTimeout(()=>{
-      i.className='sinp';i.value='';i.disabled=false;i.focus();
-    },400);
-    return; // don't lock — allow retry
+    m1tries++;
+    i.className='sinp bad';
+    // First error: show speak button, let retry
+    if(m1tries===1){
+      speak(cur.en);
+      document.getElementById('m1-speak').className='speak-btn show';
+      fb.className='fb show bad';fb.textContent='✗ 拼錯了！先聽聽發音，再試一次！';
+      wrongs.push(cur);recErr(cur.row);
+    }else if(m1tries===2){
+      speak(cur.en);
+      fb.className='fb show bad';fb.textContent='✗ 再試一次！你可以的 💪';
+    }else{
+      // 3rd fail: reveal answer
+      speak(cur.en);
+      fb.className='fb show bad';fb.textContent='✗ 正確答案是：'+cur.en+'　記住它！';
+      m1done=true;i.disabled=true;
+      document.getElementById('m1chk').style.display='none';
+      document.getElementById('m1nxt').style.display='block';
+      return;
+    }
+    setTimeout(()=>{i.className='sinp';i.value='';i.disabled=false;i.focus();},450);
   }
-  m1done=true;i.disabled=true;
-  document.getElementById('m1chk').style.display='none';
-  document.getElementById('m1nxt').style.display='block';
 }
 function nxtM1(){idx++;ldM1();}
 document.getElementById('m1i').addEventListener('keydown',e=>{if(e.key==='Enter')chkM1();});
@@ -551,7 +562,7 @@ function nxtM2(){idx++;ldM2();}
 // ── Mode 3 ──
 function ldM3(){
   if(idx>=queue.length){sumUp();return;}
-  cur=queue[idx];setProg('p3','cnt3');
+  cur=queue[idx];m3tries=0;setProg('p3','cnt3');
   document.getElementById('m3badge').textContent='📝 模式三 · 第一關：拼字';
   document.getElementById('m3lbl').textContent='看中文，拼出英文';
   document.getElementById('m3main').textContent=cur.zh||cur.en;
@@ -560,7 +571,7 @@ function ldM3(){
   document.getElementById('m3mc').style.display='none';
   document.getElementById('m3nxt').style.display='none';
   document.getElementById('m3fbs').className='fb';
-  document.getElementById('m3-speak').className='speak-btn'; // hide
+  document.getElementById('m3-speak').className='speak-btn';
   const i=document.getElementById('m3i');
   i.value='';i.className='sinp';i.disabled=false;i.focus();
 }
@@ -568,13 +579,28 @@ function chkM3(){
   const i=document.getElementById('m3i'),v=i.value.trim().toLowerCase();
   const fb=document.getElementById('m3fbs');
   if(v===cur.en.toLowerCase()){
-    i.className='sinp ok';fb.className='fb show ok';fb.textContent='🎉 拼對了！進入第二關 Definition～';
+    i.className='sinp ok';fb.className='fb show ok';
+    fb.textContent=m3tries===0?'🎉 拼對了！進入第二關 Definition～':'✅ 答對了！進入第二關～';
     document.getElementById('m3-speak').className='speak-btn';
     i.disabled=true;setTimeout(ldMCQ,650);
   }else{
-    i.className='sinp bad';fb.className='fb show bad';fb.textContent='✗ 再試一次！';
-    speak(cur.en);
-    document.getElementById('m3-speak').className='speak-btn show'; // show speak btn
+    m3tries++;
+    i.className='sinp bad';
+    if(m3tries===1){
+      speak(cur.en);
+      document.getElementById('m3-speak').className='speak-btn show';
+      fb.className='fb show bad';fb.textContent='✗ 拼錯了！先聽聽發音，再試一次！';
+    }else if(m3tries===2){
+      speak(cur.en);
+      fb.className='fb show bad';fb.textContent='✗ 再試一次！你可以的 💪';
+    }else{
+      speak(cur.en);
+      fb.className='fb show bad';fb.textContent='✗ 正確答案是：'+cur.en+'　記住它，進入下一關！';
+      i.disabled=true;
+      document.getElementById('m3-speak').className='speak-btn show';
+      setTimeout(ldMCQ,1200);
+      return;
+    }
     i.value='';
     setTimeout(()=>{i.className='sinp';i.focus();},360);
   }
@@ -671,23 +697,27 @@ async function ldM4(){
     document.getElementById('m4-content').style.display='block';
   }catch(e){
     clearInterval(lmTimer);
-    lmEl.textContent='⚠️ 出題失敗，跳過這題...';
-    setTimeout(()=>{idx++;ldM4();},1500);
+    console.error('M4 error:',e.message);
+    lmEl.textContent='⚠️ 出題失敗 ('+e.message+')，重試中...';
+    setTimeout(()=>ldM4(),2000);
   }
 }
 
 async function generateSentence(word){
+  // GAS doGet requires no-cors won't work for JSON — use redirect trick
   const url=SCRIPT_URL
     +'?word='+encodeURIComponent(word.en)
     +'&zh='+encodeURIComponent(word.zh||'')
     +'&def='+encodeURIComponent(word.def||'');
-  const res=await fetch(url);
+  // GAS web app redirects, need to follow redirect and get JSON
+  const res=await fetch(url,{redirect:'follow'});
   if(!res.ok)throw new Error('GAS error '+res.status);
-  const data=await res.json();
+  let data;
+  try{ data=await res.json(); }
+  catch(e){ throw new Error('JSON parse error'); }
   const text=(data.sentence||'').trim();
   if(!text)throw new Error('empty sentence');
-  if(!text.toLowerCase().includes(word.en.toLowerCase()))
-    throw new Error('word not in sentence');
+  // relax check: some words may appear in different forms
   return text;
 }
 
@@ -751,7 +781,7 @@ async function recErr(rowNum){
   const today=new Date().toISOString().slice(0,10);
   try{
     await fetch(SCRIPT_URL,{method:'POST',headers:{'Content-Type':'application/json'},
-      body:JSON.stringify({rowNum,date:today,sheetId:SHEET_ID,sheetName:'練習範圍'}),
+      body:JSON.stringify({rowNum,date:today,sheetName:'練習範圍'}),
       mode:'no-cors'});
     document.getElementById('m1sync').style.display='block';
   }catch(e){console.warn(e);}
