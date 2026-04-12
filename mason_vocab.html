@@ -707,12 +707,12 @@ async function generateSentence(word){
   const url=SCRIPT_URL
     +'?word='+encodeURIComponent(word.en)
     +'&zh='+encodeURIComponent(word.zh||'');
-  // fetch with no-cors can't read response
-  // Use a proxy approach: iframe postMessage or just fetch normally
-  // GAS doGet with proper deployment should allow CORS
-  const res=await fetch(url);
+  const res=await fetch(url,{redirect:'follow'});
   if(!res.ok) throw new Error('fetch error '+res.status);
-  const data=await res.json();
+  const text_raw=await res.text();
+  let data;
+  try{ data=JSON.parse(text_raw); }
+  catch(e){ throw new Error('parse error: '+text_raw.substring(0,100)); }
   const text=(data.sentence||'').trim();
   if(!text) throw new Error('empty sentence');
   return text;
