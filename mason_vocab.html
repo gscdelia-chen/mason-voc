@@ -439,7 +439,7 @@ const CSV_URL='https://docs.google.com/spreadsheets/d/e/2PACX-1vRLUl6AnBghIZxCAq
 const SHEET_ID='';
 const SCRIPT_URL='https://script.google.com/macros/s/AKfycbw2IbdtYENvJcME71HSIlupMNCw63TqF9Z4Y8ahcdmpVnV8vZwqM_ZF76FrfGoJe5MmxQ/exec';
 
-let vocab=[],queue=[],idx=0,cur=null,wrongs=[],mode=0,m1done=false,m1tries=0,m3tries=0;
+let vocab=[],queue=[],idx=0,cur=null,wrongs=[],mode=0,m1done=false,m1tries=0,m3tries=0,m4tries=0;
 
 // ── Fetch vocab ──
 async function fetchVocab(){
@@ -680,8 +680,9 @@ async function ldM4(){
     const sentEl=document.getElementById('m4-sent');
     sentEl.innerHTML=sentWithBlank.replace('___','<span class="m4-blank">___</span>');
 
-    // Hint: show Chinese meaning
-    document.getElementById('m4-hint').textContent=cur.zh?`提示：${cur.zh}`:'';
+    // Hide hint initially
+    m4tries=0;
+    document.getElementById('m4-hint').textContent='';
 
     // Build options
     const opts=shuf(allWords.map(w=>({t:w.en,c:w.en===cur.en})));
@@ -719,28 +720,45 @@ async function generateSentence(word){
 }
 
 function pickM4(btn,correct,answer,sentEl,fullSentence){
-  document.querySelectorAll('#m4-opts .mopt').forEach(b=>b.disabled=true);
   const fb=document.getElementById('m4-fb');
   if(correct){
+    document.querySelectorAll('#m4-opts .mopt').forEach(b=>b.disabled=true);
     btn.className='mopt ok';
-    fb.className='fb show ok';fb.textContent='🎉 答對了！';
-    // Reveal full sentence with word highlighted
+    fb.className='fb show ok';
+    fb.textContent= m4tries===0 ? '🎉 一次答對！超厲害！' : '✅ 答對了！';
     sentEl.innerHTML=fullSentence.replace(
       new RegExp('(\\b'+answer+'\\b)','i'),
       '<strong style="color:var(--green);text-decoration:underline">$1</strong>'
     );
+    document.getElementById('m4-nxt').style.display='block';
   }else{
+    m4tries++;
     btn.className='mopt bad';
-    fb.className='fb show bad';fb.textContent='✗ 正確答案是：'+answer;
-    document.querySelectorAll('#m4-opts .mopt').forEach(b=>{if(b.textContent===answer)b.className='mopt hint';});
-    // Reveal answer in sentence
-    sentEl.innerHTML=fullSentence.replace(
-      new RegExp('(\\b'+answer+'\\b)','i'),
-      '<strong style="color:var(--orange);text-decoration:underline">$1</strong>'
-    );
-    if(!wrongs.find(w=>w.en===cur.en))wrongs.push(cur);
+    if(m4tries===1){
+      // First wrong: show hint, re-enable other options
+      fb.className='fb show bad';fb.textContent='✗ 答錯了！看提示再試一次！';
+      document.getElementById('m4-hint').textContent=cur.zh?'提示：'+cur.zh:'';
+      if(!wrongs.find(w=>w.en===cur.en))wrongs.push(cur);
+      // Re-enable remaining options
+      setTimeout(()=>{
+        document.querySelectorAll('#m4-opts .mopt').forEach(b=>{
+          if(b.className==='mopt bad' && b.textContent!==answer) b.className='mopt';
+          if(b.className==='mopt') b.disabled=false;
+        });
+        btn.disabled=true;
+      },400);
+    }else{
+      // Second wrong: reveal answer, lock all
+      document.querySelectorAll('#m4-opts .mopt').forEach(b=>b.disabled=true);
+      fb.className='fb show bad';fb.textContent='✗ 正確答案是：'+answer;
+      document.querySelectorAll('#m4-opts .mopt').forEach(b=>{if(b.textContent===answer)b.className='mopt hint';});
+      sentEl.innerHTML=fullSentence.replace(
+        new RegExp('(\\b'+answer+'\\b)','i'),
+        '<strong style="color:var(--orange);text-decoration:underline">$1</strong>'
+      );
+      document.getElementById('m4-nxt').style.display='block';
+    }
   }
-  document.getElementById('m4-nxt').style.display='block';
 }
 
 function nxtM4(){idx++;ldM4();}
