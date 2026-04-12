@@ -12,6 +12,7 @@
   --red:#ef4444;--red-lt:#fee2e2;
   --green:#22c55e;--green-lt:#dcfce7;
   --sky:#38bdf8;--sky-lt:#e0f2fe;
+  --purple:#a855f7;--purple-lt:#f3e8ff;
   --bg:#fffbf5;--surface:#fff;--border:#fed7aa;
   --text:#431407;--muted:#9a6447;
   --radius:20px;--rsm:12px;--rxl:28px;
@@ -27,8 +28,6 @@ body{
     radial-gradient(circle at 92% 75%,rgba(249,115,22,.18) 0%,transparent 40%),
     radial-gradient(circle at 55% 5%,rgba(251,191,36,.15) 0%,transparent 32%);
 }
-
-/* ── Floating deco ── */
 .deco{position:fixed;pointer-events:none;z-index:0;font-size:1.8rem;
   animation:floatD 5s ease-in-out infinite;opacity:.16;}
 .deco:nth-child(1){top:6%;left:4%;animation-delay:0s;}
@@ -41,7 +40,6 @@ body{
 
 #app{position:relative;z-index:1;min-height:100vh;display:flex;flex-direction:column;}
 
-/* ── Header ── */
 header{
   padding:.9rem 1.5rem;display:flex;align-items:center;justify-content:space-between;
   background:rgba(255,251,245,.9);backdrop-filter:blur(12px);
@@ -50,39 +48,30 @@ header{
 }
 .logo{font-family:'Fredoka One',cursive;font-size:1.5rem;color:var(--orange);}
 .logo span{color:var(--orange-dk);}
-#vc{
-  font-size:.78rem;font-weight:800;color:var(--orange-dk);
-  background:var(--orange-lt);padding:4px 14px;border-radius:20px;
-  border:2px solid var(--orange-md);
-}
+#vc{font-size:.78rem;font-weight:800;color:var(--orange-dk);
+  background:var(--orange-lt);padding:4px 14px;border-radius:20px;border:2px solid var(--orange-md);}
 
-/* ── Screens ── */
 .screen{display:none;flex:1;padding:1.5rem 1.25rem;max-width:680px;margin:0 auto;width:100%;}
 .screen.active{display:flex;flex-direction:column;}
 
-/* ── HOME ── */
+/* HOME */
 .hero{text-align:center;padding:2rem 0 1.5rem;}
 .hero-emoji{font-size:3.8rem;display:block;margin-bottom:.5rem;
   animation:rockIt .7s ease-in-out infinite alternate;}
 @keyframes rockIt{from{transform:rotate(-8deg) scale(1);}to{transform:rotate(8deg) scale(1.1);}}
-.hero h1{font-family:'Fredoka One',cursive;font-size:2.2rem;color:var(--orange-dk);
-  line-height:1.2;margin-bottom:.4rem;}
+.hero h1{font-family:'Fredoka One',cursive;font-size:2.2rem;color:var(--orange-dk);line-height:1.2;margin-bottom:.4rem;}
 .hero h1 em{font-style:normal;color:var(--orange);}
 .hero p{color:var(--muted);font-size:.92rem;font-weight:700;margin-bottom:1.8rem;}
-
 .fetch-btn{
   display:inline-flex;align-items:center;gap:8px;
-  background:linear-gradient(135deg,var(--orange),var(--yellow));
-  color:#fff;border:none;font-family:inherit;font-size:1rem;font-weight:900;
-  padding:.8rem 2.2rem;border-radius:40px;cursor:pointer;
-  transition:transform .15s,box-shadow .15s;
-  box-shadow:0 4px 20px rgba(249,115,22,.45);letter-spacing:.3px;
-  text-shadow:0 1px 2px rgba(0,0,0,.15);
+  background:linear-gradient(135deg,var(--orange),var(--yellow));color:#fff;border:none;
+  font-family:inherit;font-size:1rem;font-weight:900;padding:.8rem 2.2rem;border-radius:40px;
+  cursor:pointer;transition:transform .15s,box-shadow .15s;
+  box-shadow:0 4px 20px rgba(249,115,22,.45);text-shadow:0 1px 2px rgba(0,0,0,.15);
 }
 .fetch-btn:hover{transform:translateY(-3px) scale(1.03);box-shadow:0 8px 32px rgba(249,115,22,.55);}
 .fetch-btn:active{transform:scale(.97);}
 .fetch-btn:disabled{opacity:.55;cursor:not-allowed;transform:none;box-shadow:none;}
-
 #fs{margin-top:.9rem;font-size:.84rem;font-weight:700;color:var(--muted);min-height:1.4rem;text-align:center;}
 #fs.ok{color:#15803d;}#fs.err{color:#dc2626;}
 
@@ -90,8 +79,7 @@ header{
 .mode-card{
   background:var(--surface);border:3px solid var(--border);border-radius:var(--radius);
   padding:1.2rem 1.4rem;cursor:pointer;display:flex;align-items:center;gap:1.1rem;
-  transition:all .2s;opacity:.38;pointer-events:none;
-  box-shadow:0 2px 12px rgba(249,115,22,.07);
+  transition:all .2s;opacity:.38;pointer-events:none;box-shadow:0 2px 12px rgba(249,115,22,.07);
 }
 .mode-card.ready{opacity:1;pointer-events:auto;}
 .mode-card:hover{border-color:var(--orange);transform:translateY(-3px) scale(1.01);box-shadow:var(--shadow-md);}
@@ -101,29 +89,32 @@ header{
 .mi.m1{background:var(--orange-lt);border:2px solid var(--orange-md);}
 .mi.m2{background:var(--sky-lt);border:2px solid #bae6fd;}
 .mi.m3{background:var(--yellow-lt);border:2px solid #fde68a;}
+.mi.m4{background:var(--purple-lt);border:2px solid #d8b4fe;}
 .mode-card h3{font-size:.95rem;font-weight:900;color:var(--orange-dk);margin-bottom:.2rem;}
 .mode-card p{font-size:.78rem;color:var(--muted);line-height:1.5;font-weight:600;}
 .mode-arrow{margin-left:auto;color:var(--orange-md);font-size:1.5rem;flex-shrink:0;font-weight:900;}
 
-/* ── Shared ── */
+/* Shared */
 .back-btn{
   background:none;border:2.5px solid var(--border);color:var(--muted);
   font-family:inherit;font-size:.82rem;font-weight:800;padding:.35rem 1.1rem;
-  border-radius:20px;cursor:pointer;margin-bottom:1.1rem;width:fit-content;transition:all .2s;
+  border-radius:20px;cursor:pointer;margin-bottom:.8rem;width:fit-content;transition:all .2s;
 }
 .back-btn:hover{border-color:var(--orange);color:var(--orange);background:var(--orange-lt);}
 
-.pb{height:10px;background:var(--orange-lt);border-radius:5px;
-  margin-bottom:1.6rem;overflow:hidden;border:2px solid var(--orange-md);}
-.pf{height:100%;background:linear-gradient(90deg,var(--orange),var(--yellow));
-  border-radius:5px;transition:width .4s ease;}
+/* Progress bar + counter */
+.prog-wrap{margin-bottom:1.4rem;}
+.prog-top{display:flex;justify-content:space-between;align-items:center;margin-bottom:.4rem;}
+.prog-label{font-size:.72rem;font-weight:800;color:var(--orange);}
+.prog-count{font-size:.72rem;font-weight:800;color:var(--muted);}
+.pb{height:10px;background:var(--orange-lt);border-radius:5px;overflow:hidden;border:2px solid var(--orange-md);}
+.pf{height:100%;background:linear-gradient(90deg,var(--orange),var(--yellow));border-radius:5px;transition:width .4s ease;}
 
 .step-badge{
   display:inline-flex;align-items:center;gap:6px;
-  background:var(--orange-lt);color:var(--orange-dk);
-  font-size:.72rem;font-weight:900;padding:4px 14px;border-radius:20px;
-  border:2px solid var(--orange-md);margin-bottom:1rem;
-  letter-spacing:.5px;text-transform:uppercase;
+  background:var(--orange-lt);color:var(--orange-dk);font-size:.72rem;font-weight:900;
+  padding:4px 14px;border-radius:20px;border:2px solid var(--orange-md);
+  margin-bottom:1rem;letter-spacing:.5px;text-transform:uppercase;
 }
 
 .wcard{
@@ -132,17 +123,25 @@ header{
   padding:2rem 1.5rem;text-align:center;margin-bottom:1.2rem;
   box-shadow:var(--shadow);position:relative;overflow:hidden;
 }
-.wcard::before{content:'🔥';position:absolute;top:12px;right:16px;
-  font-size:1.1rem;opacity:.35;}
-.wlabel{font-size:.7rem;text-transform:uppercase;letter-spacing:2px;
-  color:var(--orange);font-weight:800;margin-bottom:.6rem;}
+.wcard::before{content:'🔥';position:absolute;top:12px;right:16px;font-size:1.1rem;opacity:.35;}
+.wlabel{font-size:.7rem;text-transform:uppercase;letter-spacing:2px;color:var(--orange);font-weight:800;margin-bottom:.6rem;}
 .wmain{font-family:'Fredoka One',cursive;font-size:2.2rem;color:var(--orange-dk);line-height:1.25;}
 .wpos-badge{
   display:inline-block;margin-top:.7rem;font-size:.72rem;font-weight:800;
   color:#fff;background:linear-gradient(135deg,var(--orange),var(--yellow));
-  padding:3px 14px;border-radius:20px;letter-spacing:.5px;
-  text-shadow:0 1px 2px rgba(0,0,0,.15);
+  padding:3px 14px;border-radius:20px;text-shadow:0 1px 2px rgba(0,0,0,.15);
 }
+
+/* Speak button (shows on wrong) */
+.speak-btn{
+  display:none;width:100%;margin-bottom:.8rem;
+  background:linear-gradient(135deg,var(--sky),#7dd3fc);color:#0c4a6e;
+  border:none;font-family:inherit;font-size:.9rem;font-weight:900;
+  padding:.65rem 1.2rem;border-radius:var(--rsm);cursor:pointer;
+  transition:all .15s;box-shadow:0 3px 12px rgba(56,189,248,.3);
+}
+.speak-btn.show{display:flex;align-items:center;justify-content:center;gap:8px;}
+.speak-btn:hover{transform:translateY(-1px);box-shadow:0 6px 18px rgba(56,189,248,.45);}
 
 .sinp{
   width:100%;font-family:'Fredoka One',cursive;font-size:1.5rem;text-align:center;
@@ -165,21 +164,20 @@ header{
 .btn{width:100%;padding:.82rem;border:none;font-family:inherit;font-size:.95rem;
   font-weight:900;border-radius:var(--radius);cursor:pointer;transition:all .15s;letter-spacing:.3px;}
 .btn+.btn{margin-top:.6rem;}
-.btn.pri{
-  background:linear-gradient(135deg,var(--orange),#fb923c);color:#fff;
-  box-shadow:0 4px 16px rgba(249,115,22,.4);text-shadow:0 1px 2px rgba(0,0,0,.1);
-}
+.btn.pri{background:linear-gradient(135deg,var(--orange),#fb923c);color:#fff;
+  box-shadow:0 4px 16px rgba(249,115,22,.4);text-shadow:0 1px 2px rgba(0,0,0,.1);}
 .btn.pri:hover{transform:translateY(-2px);box-shadow:0 8px 24px rgba(249,115,22,.5);}
 .btn.pri:active{transform:scale(.97);}
 .btn.gho{background:#fff;color:var(--orange);border:3px solid var(--orange-md);font-weight:900;}
 .btn.gho:hover{background:var(--orange-lt);border-color:var(--orange);}
 .btn.sky{background:linear-gradient(135deg,var(--sky),#7dd3fc);color:#0c4a6e;
   box-shadow:0 4px 16px rgba(56,189,248,.35);font-weight:900;}
-.btn.sky:hover{transform:translateY(-2px);box-shadow:0 8px 24px rgba(56,189,248,.45);}
-.btn.green{background:linear-gradient(135deg,var(--green),#86efac);color:#14532d;
-  box-shadow:0 4px 16px rgba(34,197,94,.35);}
+.btn.sky:hover{transform:translateY(-2px);}
+.btn.purple{background:linear-gradient(135deg,var(--purple),#c084fc);color:#fff;
+  box-shadow:0 4px 16px rgba(168,85,247,.35);font-weight:900;}
+.btn.purple:hover{transform:translateY(-2px);box-shadow:0 8px 24px rgba(168,85,247,.45);}
 
-/* ── Mode 2 ── */
+/* Mode 2 */
 .m2w{font-family:'Fredoka One',cursive;text-align:center;margin:1.2rem 0 .4rem;
   font-size:3.2rem;color:var(--orange-dk);letter-spacing:-1px;}
 .m2p{text-align:center;margin-bottom:1.4rem;}
@@ -195,9 +193,8 @@ header{
 .rzh{font-family:'Fredoka One',cursive;font-size:1.3rem;color:var(--orange-dk);}
 .rdef{font-size:.84rem;color:var(--muted);line-height:1.7;margin-top:.5rem;font-weight:600;}
 
-/* ── MCQ ── */
-.mcq-title{font-size:.82rem;font-weight:800;color:var(--orange-dk);
-  margin-bottom:.7rem;display:flex;align-items:center;gap:6px;}
+/* MCQ */
+.mcq-title{font-size:.82rem;font-weight:800;color:var(--orange-dk);margin-bottom:.7rem;display:flex;align-items:center;gap:6px;}
 .mcq-list{display:flex;flex-direction:column;gap:.55rem;margin-bottom:.9rem;}
 .mopt{
   background:#fff;border:2.5px solid var(--border);border-radius:var(--rsm);
@@ -209,23 +206,45 @@ header{
 .mopt.bad{background:var(--red-lt);border-color:var(--red);color:#7f1d1d;}
 .mopt.hint{background:#f0fdf4;border-color:var(--green);color:#14532d;}
 
-/* ── Stage divider ── */
 .stage-div{display:flex;align-items:center;gap:.7rem;margin:1rem 0 1.1rem;}
 .stage-div::before,.stage-div::after{content:'';flex:1;height:2.5px;
   background:linear-gradient(90deg,transparent,var(--orange-md),transparent);}
-.stage-div span{font-size:.72rem;font-weight:900;color:var(--orange);
-  letter-spacing:1px;white-space:nowrap;text-transform:uppercase;}
+.stage-div span{font-size:.72rem;font-weight:900;color:var(--orange);letter-spacing:1px;white-space:nowrap;text-transform:uppercase;}
 
-/* ── Summary ── */
+/* Mode 4 */
+.m4-sentence{
+  background:linear-gradient(135deg,var(--purple-lt),#fff);
+  border:3px solid #d8b4fe;border-radius:var(--rxl);
+  padding:1.8rem 1.5rem;text-align:center;margin-bottom:1.2rem;
+  box-shadow:0 4px 24px rgba(168,85,247,.12);position:relative;
+}
+.m4-sentence::before{content:'✨';position:absolute;top:12px;right:16px;font-size:1.1rem;opacity:.4;}
+.m4-sent-label{font-size:.7rem;text-transform:uppercase;letter-spacing:2px;color:var(--purple);font-weight:800;margin-bottom:.8rem;}
+.m4-sent-text{font-size:1.25rem;font-weight:700;color:var(--text);line-height:1.8;}
+.m4-blank{
+  display:inline-block;min-width:100px;border-bottom:3px solid var(--purple);
+  color:var(--purple);font-weight:900;padding:0 8px;font-family:'Fredoka One',cursive;
+  font-size:1.3rem;vertical-align:bottom;
+}
+.m4-hint{font-size:.8rem;color:var(--muted);font-weight:600;margin-top:.8rem;}
+.m4-loading{
+  text-align:center;padding:2rem 1rem;color:var(--muted);font-weight:700;
+}
+.m4-loading .spinner{
+  display:inline-block;width:32px;height:32px;border:3px solid var(--orange-md);
+  border-top-color:var(--orange);border-radius:50%;animation:spin .8s linear infinite;
+  margin-bottom:.8rem;
+}
+@keyframes spin{to{transform:rotate(360deg);}}
+
+/* Summary */
 .summary{text-align:center;padding:1.5rem 0;}
 .sum-trophy{font-size:4.5rem;animation:rockIt .7s ease-in-out infinite alternate;}
-.spct{font-family:'Fredoka One',cursive;font-size:4.5rem;color:var(--orange);
-  line-height:1;margin:.4rem 0;}
+.spct{font-family:'Fredoka One',cursive;font-size:4.5rem;color:var(--orange);line-height:1;margin:.4rem 0;}
 .ssub{color:var(--muted);margin:.4rem 0 1.6rem;font-size:.95rem;font-weight:700;}
 .wlist{text-align:left;background:#fff;border:2.5px solid var(--border);
   border-radius:var(--radius);padding:1.1rem 1.3rem;margin-bottom:1.4rem;}
-.wlist h4{font-size:.72rem;font-weight:900;text-transform:uppercase;
-  letter-spacing:1px;color:var(--orange);margin-bottom:.7rem;}
+.wlist h4{font-size:.72rem;font-weight:900;text-transform:uppercase;letter-spacing:1px;color:var(--orange);margin-bottom:.7rem;}
 .wrow{display:flex;justify-content:space-between;align-items:center;
   padding:.4rem 0;border-bottom:2px dashed var(--border);font-size:.88rem;}
 .wrow:last-child{border:none;}
@@ -249,7 +268,7 @@ header{
     <div id="vc">尚未載入</div>
   </header>
 
-  <!-- ══ HOME ══ -->
+  <!-- HOME -->
   <div class="screen active" id="s-home">
     <div class="hero">
       <span class="hero-emoji">🚀</span>
@@ -263,7 +282,7 @@ header{
         <div class="mi m1">✏️</div>
         <div style="flex:1">
           <h3>模式一：中文 → 拼字練習</h3>
-          <p>看中文，把英文單字拼出來。拼錯時自動唸發音，並記錄到 Sheets！</p>
+          <p>看中文，把英文單字拼出來。拼錯可聽發音再試！</p>
         </div>
         <div class="mode-arrow">›</div>
       </div>
@@ -278,37 +297,55 @@ header{
       <div class="mode-card" id="c3" onclick="startMode(3)">
         <div class="mi m3">📝</div>
         <div style="flex:1">
-          <h3>模式三：拼字 + 詞性 + Definition</h3>
-          <p>先拼字，再選詞性，最後挑戰 definition 選擇題！三關連環考！</p>
+          <h3>模式三：拼字 + Definition 選擇題</h3>
+          <p>先拼字成功，再挑戰 definition 選擇題！</p>
+        </div>
+        <div class="mode-arrow">›</div>
+      </div>
+      <div class="mode-card" id="c4" onclick="startMode(4)">
+        <div class="mi m4">🧩</div>
+        <div style="flex:1">
+          <h3>模式四：句子填空挑戰</h3>
+          <p>看句子，從選項中選出正確的單字填入空格！AI 出題！</p>
         </div>
         <div class="mode-arrow">›</div>
       </div>
     </div>
   </div>
 
-  <!-- ══ MODE 1 ══ -->
+  <!-- MODE 1 -->
   <div class="screen" id="s-m1">
     <button class="back-btn" onclick="goHome()">← 返回</button>
-    <div class="pb"><div class="pf" id="p1"></div></div>
-    <div class="step-badge">✏️ 模式一 · 拼字練習</div>
+    <div class="prog-wrap">
+      <div class="prog-top">
+        <span class="prog-label">✏️ 模式一 · 拼字練習</span>
+        <span class="prog-count" id="cnt1">0 / 0</span>
+      </div>
+      <div class="pb"><div class="pf" id="p1"></div></div>
+    </div>
     <div class="wcard">
       <div class="wlabel">看中文，拼出英文</div>
       <div class="wmain" id="m1zh">—</div>
     </div>
+    <button class="speak-btn" id="m1-speak" onclick="speak(cur.en)">🔊 聽一下發音再試試看！</button>
     <input class="sinp" id="m1i" type="text" placeholder="輸入英文單字..."
       autocomplete="off" autocorrect="off" autocapitalize="none" spellcheck="false">
     <div class="fb" id="m1fb"></div>
     <button class="btn pri" id="m1chk" onclick="chkM1()">✔ 確認</button>
     <button class="btn gho" id="m1nxt" style="display:none" onclick="nxtM1()">下一題 →</button>
-    <div style="text-align:center;margin-top:.7rem;font-size:.75rem;font-weight:800;
-      color:#15803d;display:none" id="m1sync">📝 錯誤已同步到 Sheets ✓</div>
+    <div style="text-align:center;margin-top:.7rem;font-size:.75rem;font-weight:800;color:#15803d;display:none" id="m1sync">📝 錯誤已同步到 Sheets ✓</div>
   </div>
 
-  <!-- ══ MODE 2 ══ -->
+  <!-- MODE 2 -->
   <div class="screen" id="s-m2">
     <button class="back-btn" onclick="goHome()">← 返回</button>
-    <div class="pb"><div class="pf" id="p2"></div></div>
-    <div class="step-badge">🔊 模式二 · 發音練習</div>
+    <div class="prog-wrap">
+      <div class="prog-top">
+        <span class="prog-label">🔊 模式二 · 發音練習</span>
+        <span class="prog-count" id="cnt2">0 / 0</span>
+      </div>
+      <div class="pb"><div class="pf" id="p2"></div></div>
+    </div>
     <div class="m2w" id="m2en">—</div>
     <div class="m2p"><span class="wpos-badge" id="m2pos" style="display:none"></span></div>
     <div class="m2btns">
@@ -322,37 +359,30 @@ header{
     <button class="btn pri" onclick="nxtM2()">下一個 →</button>
   </div>
 
-  <!-- ══ MODE 3 ══ -->
+  <!-- MODE 3 -->
   <div class="screen" id="s-m3">
     <button class="back-btn" onclick="goHome()">← 返回</button>
-    <div class="pb"><div class="pf" id="p3"></div></div>
-    <div class="step-badge" id="m3badge">📝 模式三 · 第一關：拼字</div>
-
+    <div class="prog-wrap">
+      <div class="prog-top">
+        <span class="prog-label" id="m3badge">📝 模式三 · 第一關：拼字</span>
+        <span class="prog-count" id="cnt3">0 / 0</span>
+      </div>
+      <div class="pb"><div class="pf" id="p3"></div></div>
+    </div>
     <div class="wcard">
       <div class="wlabel" id="m3lbl">看中文，拼出英文</div>
       <div class="wmain" id="m3main">—</div>
       <span class="wpos-badge" id="m3pos" style="display:none;margin-top:.7rem;"></span>
     </div>
-
-    <!-- Stage A: Spell -->
     <div id="m3sp">
+      <button class="speak-btn" id="m3-speak" onclick="speak(cur.en)">🔊 聽一下發音再試試看！</button>
       <input class="sinp" id="m3i" type="text" placeholder="輸入英文單字..."
         autocomplete="off" autocorrect="off" autocapitalize="none" spellcheck="false">
       <div class="fb" id="m3fbs"></div>
       <button class="btn pri" onclick="chkM3()">✔ 確認</button>
     </div>
-
-    <!-- Stage B: POS MCQ -->
-    <div id="m3pos-area" style="display:none">
-      <div class="stage-div"><span>第二關：詞性選擇題</span></div>
-      <div class="mcq-title">🏷️ 這個單字的詞性是？</div>
-      <div class="mcq-list" id="m3pos-opts"></div>
-      <div class="fb" id="m3fbpos"></div>
-    </div>
-
-    <!-- Stage C: Definition MCQ -->
     <div id="m3mc" style="display:none">
-      <div class="stage-div"><span>第三關：Definition 選擇題</span></div>
+      <div class="stage-div"><span>第二關：Definition 選擇題</span></div>
       <div class="mcq-title">📖 選出正確的英文定義：</div>
       <div class="mcq-list" id="m3opts"></div>
       <div class="fb" id="m3fbm"></div>
@@ -360,7 +390,33 @@ header{
     </div>
   </div>
 
-  <!-- ══ SUMMARY ══ -->
+  <!-- MODE 4 -->
+  <div class="screen" id="s-m4">
+    <button class="back-btn" onclick="goHome()">← 返回</button>
+    <div class="prog-wrap">
+      <div class="prog-top">
+        <span class="prog-label">🧩 模式四 · 句子填空</span>
+        <span class="prog-count" id="cnt4">0 / 0</span>
+      </div>
+      <div class="pb"><div class="pf" id="p4"></div></div>
+    </div>
+    <div id="m4-loading" class="m4-loading">
+      <div class="spinner"></div>
+      <div id="m4-loading-msg">AI 正在出題中...</div>
+    </div>
+    <div id="m4-content" style="display:none">
+      <div class="m4-sentence">
+        <div class="m4-sent-label">📖 選出正確的單字填入空格</div>
+        <div class="m4-sent-text" id="m4-sent"></div>
+        <div class="m4-hint" id="m4-hint"></div>
+      </div>
+      <div class="mcq-list" id="m4-opts"></div>
+      <div class="fb" id="m4-fb"></div>
+      <button class="btn purple" id="m4-nxt" style="display:none" onclick="nxtM4()">🎉 下一題 →</button>
+    </div>
+  </div>
+
+  <!-- SUMMARY -->
   <div class="screen" id="s-sum">
     <div class="summary">
       <div class="sum-trophy" id="sum-trophy">🏆</div>
@@ -380,15 +436,12 @@ header{
 
 <script>
 const CSV_URL='https://docs.google.com/spreadsheets/d/e/2PACX-1vRLUl6AnBghIZxCAqIdYE5pKdyU7b2rioFXCoIXHPSTWBPozvpYI6UegDn_n7gPfNfc5uwnm3AiOQJd/pub?gid=0&single=true&output=csv';
-const SHEET_ID='';// Mason的Sheet ID（GAS已部署不需要）
+const SHEET_ID='';
 const SCRIPT_URL='https://script.google.com/macros/s/AKfycbw2IbdtYENvJcME71HSIlupMNCw63TqF9Z4Y8ahcdmpVnV8vZwqM_ZF76FrfGoJe5MmxQ/exec';
 
-const ALL_POS=['n.','v.','adj.','adv.','prep.','conj.','pron.','interj.','vt.','vi.','n./v.','adj./adv.'];
-
 let vocab=[],queue=[],idx=0,cur=null,wrongs=[],mode=0,m1done=false;
-let discoveredPos=[];
 
-// ── Fetch ──
+// ── Fetch vocab ──
 async function fetchVocab(){
   const btn=document.getElementById('fb-btn'),st=document.getElementById('fs');
   btn.disabled=true;st.className='';st.textContent='⏳ 載入中...';
@@ -403,18 +456,13 @@ async function fetchVocab(){
   }catch(e){st.className='err';st.textContent='❌ '+e.message;}
   btn.disabled=false;
 }
-
 function parseCSV(txt){
-  vocab=[];discoveredPos=[];
-  const posSet=new Set();
+  vocab=[];
   txt.trim().split('\n').slice(1).forEach((row,i)=>{
     const c=splitRow(row);
     const en=cl(c[0]);if(!en)return;
-    const pos=cl(c[1]||'');
-    if(pos)posSet.add(pos);
-    vocab.push({en,pos,zh:cl(c[2]||''),def:cl(c[3]||''),row:i+2});
+    vocab.push({en,pos:cl(c[1]||''),zh:cl(c[2]||''),def:cl(c[3]||''),row:i+2});
   });
-  discoveredPos=[...posSet];
 }
 function splitRow(row){
   const cols=[];let cur='',q=false;
@@ -431,15 +479,21 @@ function startMode(m){
   mode=m;queue=shuf([...vocab]);idx=0;wrongs=[];
   if(m===1){show('s-m1');ldM1();}
   else if(m===2){show('s-m2');ldM2();}
-  else{show('s-m3');ldM3();}
+  else if(m===3){show('s-m3');ldM3();}
+  else{show('s-m4');ldM4();}
 }
 function shuf(a){for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]];}return a;}
-function prog(id){document.getElementById(id).style.width=(idx/queue.length*100)+'%';}
+
+function setProg(pfId,cntId){
+  const pct=queue.length?idx/queue.length*100:0;
+  document.getElementById(pfId).style.width=pct+'%';
+  document.getElementById(cntId).textContent=`${idx} / ${queue.length}`;
+}
 
 // ── Mode 1 ──
 function ldM1(){
   if(idx>=queue.length){sumUp();return;}
-  cur=queue[idx];m1done=false;prog('p1');
+  cur=queue[idx];m1done=false;setProg('p1','cnt1');
   document.getElementById('m1zh').textContent=cur.zh||cur.en;
   const i=document.getElementById('m1i');
   i.value='';i.className='sinp';i.disabled=false;
@@ -447,6 +501,7 @@ function ldM1(){
   document.getElementById('m1chk').style.display='block';
   document.getElementById('m1nxt').style.display='none';
   document.getElementById('m1sync').style.display='none';
+  document.getElementById('m1-speak').className='speak-btn'; // hide
   i.focus();
 }
 function chkM1(){
@@ -455,10 +510,19 @@ function chkM1(){
   const fb=document.getElementById('m1fb');
   if(v===cur.en.toLowerCase()){
     i.className='sinp ok';fb.className='fb show ok';fb.textContent='🎉 完全正確！太棒了！';
+    document.getElementById('m1-speak').className='speak-btn'; // keep hidden
   }else{
     i.className='sinp bad';fb.className='fb show bad';
     fb.textContent='✗ 正確答案：'+cur.en+'  加油！';
-    speak(cur.en);wrongs.push(cur);recErr(cur.row);
+    speak(cur.en);
+    document.getElementById('m1-speak').className='speak-btn show'; // show speak btn
+    wrongs.push(cur);recErr(cur.row);
+    // let retry: reset input, don't advance yet
+    m1done=false;
+    setTimeout(()=>{
+      i.className='sinp';i.value='';i.disabled=false;i.focus();
+    },400);
+    return; // don't lock — allow retry
   }
   m1done=true;i.disabled=true;
   document.getElementById('m1chk').style.display='none';
@@ -470,7 +534,7 @@ document.getElementById('m1i').addEventListener('keydown',e=>{if(e.key==='Enter'
 // ── Mode 2 ──
 function ldM2(){
   if(idx>=queue.length){sumUp();return;}
-  cur=queue[idx];prog('p2');
+  cur=queue[idx];setProg('p2','cnt2');
   document.getElementById('m2en').textContent=cur.en;
   const p=document.getElementById('m2pos');
   if(cur.pos){p.textContent=cur.pos;p.style.display='';}else{p.style.display='none';}
@@ -487,16 +551,16 @@ function nxtM2(){idx++;ldM2();}
 // ── Mode 3 ──
 function ldM3(){
   if(idx>=queue.length){sumUp();return;}
-  cur=queue[idx];prog('p3');
+  cur=queue[idx];setProg('p3','cnt3');
   document.getElementById('m3badge').textContent='📝 模式三 · 第一關：拼字';
   document.getElementById('m3lbl').textContent='看中文，拼出英文';
   document.getElementById('m3main').textContent=cur.zh||cur.en;
   document.getElementById('m3pos').style.display='none';
   document.getElementById('m3sp').style.display='block';
-  document.getElementById('m3pos-area').style.display='none';
   document.getElementById('m3mc').style.display='none';
   document.getElementById('m3nxt').style.display='none';
   document.getElementById('m3fbs').className='fb';
+  document.getElementById('m3-speak').className='speak-btn'; // hide
   const i=document.getElementById('m3i');
   i.value='';i.className='sinp';i.disabled=false;i.focus();
 }
@@ -504,47 +568,22 @@ function chkM3(){
   const i=document.getElementById('m3i'),v=i.value.trim().toLowerCase();
   const fb=document.getElementById('m3fbs');
   if(v===cur.en.toLowerCase()){
-    i.className='sinp ok';fb.className='fb show ok';fb.textContent='🎉 拼對了！進入第二關～';
-    i.disabled=true;setTimeout(ldPOS,650);
+    i.className='sinp ok';fb.className='fb show ok';fb.textContent='🎉 拼對了！進入第二關 Definition～';
+    document.getElementById('m3-speak').className='speak-btn';
+    i.disabled=true;setTimeout(ldMCQ,650);
   }else{
     i.className='sinp bad';fb.className='fb show bad';fb.textContent='✗ 再試一次！';
-    speak(cur.en);i.value='';
+    speak(cur.en);
+    document.getElementById('m3-speak').className='speak-btn show'; // show speak btn
+    i.value='';
     setTimeout(()=>{i.className='sinp';i.focus();},360);
   }
 }
 document.getElementById('m3i').addEventListener('keydown',e=>{if(e.key==='Enter')chkM3();});
 
-function ldPOS(){
-  document.getElementById('m3badge').textContent='📝 模式三 · 第二關：詞性';
-  document.getElementById('m3sp').style.display='none';
-  document.getElementById('m3pos-area').style.display='block';
-  document.getElementById('m3fbpos').className='fb';
-  const correct=cur.pos||'n.';
-  const pool=shuf([...new Set([...discoveredPos,...ALL_POS])].filter(p=>p!==correct)).slice(0,3);
-  const opts=shuf([{t:correct,c:true},...pool.map(p=>({t:p,c:false}))]);
-  const box=document.getElementById('m3pos-opts');box.innerHTML='';
-  opts.forEach(o=>{
-    const b=document.createElement('button');b.className='mopt';
-    b.textContent=o.t;b.onclick=()=>pickPOS(b,o.c,correct);
-    box.appendChild(b);
-  });
-}
-function pickPOS(btn,correct,ans){
-  document.querySelectorAll('#m3pos-opts .mopt').forEach(b=>b.disabled=true);
-  const fb=document.getElementById('m3fbpos');
-  if(correct){
-    btn.className='mopt ok';fb.className='fb show ok';fb.textContent='✅ 正確！詞性答對了！進入第三關～';
-  }else{
-    btn.className='mopt bad';fb.className='fb show bad';fb.textContent='✗ 正確詞性是：'+ans;
-    document.querySelectorAll('#m3pos-opts .mopt').forEach(b=>{if(b.textContent===ans)b.className='mopt hint';});
-    wrongs.push(cur);
-  }
-  setTimeout(ldMCQ,700);
-}
-
 function ldMCQ(){
-  document.getElementById('m3badge').textContent='📝 模式三 · 第三關：Definition';
-  document.getElementById('m3pos-area').style.display='none';
+  document.getElementById('m3badge').textContent='📝 模式三 · 第二關：Definition';
+  document.getElementById('m3sp').style.display='none';
   document.getElementById('m3mc').style.display='block';
   document.getElementById('m3lbl').textContent='這個單字的定義是？';
   document.getElementById('m3main').textContent=cur.en;
@@ -565,7 +604,7 @@ function pickDef(btn,correct,ans){
   document.querySelectorAll('#m3opts .mopt').forEach(b=>b.disabled=true);
   const fb=document.getElementById('m3fbm');
   if(correct){
-    btn.className='mopt ok';fb.className='fb show ok';fb.textContent='🏆 答對了！三關全過！';
+    btn.className='mopt ok';fb.className='fb show ok';fb.textContent='🏆 答對了！兩關全過！';
   }else{
     btn.className='mopt bad';fb.className='fb show bad';fb.textContent='✗ 正確答案：'+ans;
     document.querySelectorAll('#m3opts .mopt').forEach(b=>{if(b.textContent===ans)b.className='mopt hint';});
@@ -574,6 +613,121 @@ function pickDef(btn,correct,ans){
   document.getElementById('m3nxt').style.display='block';
 }
 function nxtM3(){idx++;ldM3();}
+
+// ── Mode 4 ──
+const loadingMsgs=['AI 正在幫你出題...','想一個好句子中...','快好了！','準備完成！'];
+let m4sentenceCache={};
+
+async function ldM4(){
+  if(idx>=queue.length){sumUp();return;}
+  cur=queue[idx];setProg('p4','cnt4');
+
+  // Show loading, hide content
+  document.getElementById('m4-loading').style.display='block';
+  document.getElementById('m4-content').style.display='none';
+  document.getElementById('m4-fb').className='fb';
+  document.getElementById('m4-nxt').style.display='none';
+
+  // Animate loading message
+  let mi=0;
+  const lmEl=document.getElementById('m4-loading-msg');
+  const lmTimer=setInterval(()=>{lmEl.textContent=loadingMsgs[mi%loadingMsgs.length];mi++;},900);
+
+  try{
+    // Pick 3 distractor words
+    const distractors=shuf(vocab.filter(v=>v.en!==cur.en)).slice(0,3);
+    const allWords=[cur,...distractors];
+
+    // Use cached sentence if available
+    let sentence;
+    if(m4sentenceCache[cur.en]){
+      sentence=m4sentenceCache[cur.en];
+    }else{
+      sentence=await generateSentence(cur);
+      m4sentenceCache[cur.en]=sentence;
+    }
+
+    clearInterval(lmTimer);
+
+    // Build sentence display with blank
+    const sentWithBlank=sentence.replace(new RegExp('\\b'+cur.en+'\\b','i'),'___');
+    const sentEl=document.getElementById('m4-sent');
+    sentEl.innerHTML=sentWithBlank.replace('___','<span class="m4-blank">___</span>');
+
+    // Hint: show Chinese meaning
+    document.getElementById('m4-hint').textContent=cur.zh?`提示：${cur.zh}`:'';
+
+    // Build options
+    const opts=shuf(allWords.map(w=>({t:w.en,c:w.en===cur.en})));
+    const box=document.getElementById('m4-opts');box.innerHTML='';
+    opts.forEach(o=>{
+      const b=document.createElement('button');b.className='mopt';
+      b.textContent=o.t;
+      b.onclick=()=>pickM4(b,o.c,cur.en,sentEl,sentence);
+      box.appendChild(b);
+    });
+
+    document.getElementById('m4-loading').style.display='none';
+    document.getElementById('m4-content').style.display='block';
+  }catch(e){
+    clearInterval(lmTimer);
+    lmEl.textContent='⚠️ 出題失敗，跳過這題...';
+    setTimeout(()=>{idx++;ldM4();},1500);
+  }
+}
+
+async function generateSentence(word){
+  const prompt=`Create one simple English sentence for an elementary school student using the word "${word.en}" (meaning: ${word.zh||word.def}). 
+Rules:
+- The sentence must contain the EXACT word "${word.en}" (not a different form)
+- Keep it short (8-15 words)
+- Make it fun and easy to understand
+- Reply with ONLY the sentence, nothing else`;
+
+  const res=await fetch('https://api.anthropic.com/v1/messages',{
+    method:'POST',
+    headers:{'Content-Type':'application/json'},
+    body:JSON.stringify({
+      model:'claude-sonnet-4-20250514',
+      max_tokens:100,
+      messages:[{role:'user',content:prompt}]
+    })
+  });
+  if(!res.ok)throw new Error('API error');
+  const data=await res.json();
+  const text=(data.content||[]).map(b=>b.text||'').join('').trim();
+  // Verify the word appears in the sentence
+  if(!text.toLowerCase().includes(word.en.toLowerCase()))
+    throw new Error('word not in sentence');
+  return text;
+}
+
+function pickM4(btn,correct,answer,sentEl,fullSentence){
+  document.querySelectorAll('#m4-opts .mopt').forEach(b=>b.disabled=true);
+  const fb=document.getElementById('m4-fb');
+  if(correct){
+    btn.className='mopt ok';
+    fb.className='fb show ok';fb.textContent='🎉 答對了！';
+    // Reveal full sentence with word highlighted
+    sentEl.innerHTML=fullSentence.replace(
+      new RegExp('(\\b'+answer+'\\b)','i'),
+      '<strong style="color:var(--green);text-decoration:underline">$1</strong>'
+    );
+  }else{
+    btn.className='mopt bad';
+    fb.className='fb show bad';fb.textContent='✗ 正確答案是：'+answer;
+    document.querySelectorAll('#m4-opts .mopt').forEach(b=>{if(b.textContent===answer)b.className='mopt hint';});
+    // Reveal answer in sentence
+    sentEl.innerHTML=fullSentence.replace(
+      new RegExp('(\\b'+answer+'\\b)','i'),
+      '<strong style="color:var(--orange);text-decoration:underline">$1</strong>'
+    );
+    if(!wrongs.find(w=>w.en===cur.en))wrongs.push(cur);
+  }
+  document.getElementById('m4-nxt').style.display='block';
+}
+
+function nxtM4(){idx++;ldM4();}
 
 // ── Summary ──
 function sumUp(){
