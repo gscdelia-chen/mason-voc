@@ -522,7 +522,7 @@ function chkM1(){
     if(m1tries===1){
       speak(cur.en);
       document.getElementById('m1-speak').className='speak-btn show';
-      fb.className='fb show bad';fb.textContent='✗ 拼錯了！先聽聽發音，再試一次！';
+      fb.className='fb show bad';fb.textContent='✗ 拼錯了！先聽聽發音，再試一次！ (row:'+cur.row+')';
       wrongs.push(cur);recErr(cur.row);
     }else if(m1tries===2){
       speak(cur.en);
