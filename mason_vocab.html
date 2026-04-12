@@ -677,26 +677,15 @@ async function ldM4(){
 }
 
 async function generateSentence(word){
-  const prompt=`Create one simple English sentence for an elementary school student using the word "${word.en}" (meaning: ${word.zh||word.def}). 
-Rules:
-- The sentence must contain the EXACT word "${word.en}" (not a different form)
-- Keep it short (8-15 words)
-- Make it fun and easy to understand
-- Reply with ONLY the sentence, nothing else`;
-
-  const res=await fetch('https://api.anthropic.com/v1/messages',{
-    method:'POST',
-    headers:{'Content-Type':'application/json'},
-    body:JSON.stringify({
-      model:'claude-sonnet-4-20250514',
-      max_tokens:100,
-      messages:[{role:'user',content:prompt}]
-    })
-  });
-  if(!res.ok)throw new Error('API error');
+  const url=SCRIPT_URL
+    +'?word='+encodeURIComponent(word.en)
+    +'&zh='+encodeURIComponent(word.zh||'')
+    +'&def='+encodeURIComponent(word.def||'');
+  const res=await fetch(url);
+  if(!res.ok)throw new Error('GAS error '+res.status);
   const data=await res.json();
-  const text=(data.content||[]).map(b=>b.text||'').join('').trim();
-  // Verify the word appears in the sentence
+  const text=(data.sentence||'').trim();
+  if(!text)throw new Error('empty sentence');
   if(!text.toLowerCase().includes(word.en.toLowerCase()))
     throw new Error('word not in sentence');
   return text;
@@ -749,8 +738,12 @@ function sumUp(){
 // ── Speech ──
 function speak(t){
   if(!window.speechSynthesis)return;
-  const u=new SpeechSynthesisUtterance(t);u.lang='en-US';u.rate=.85;
-  speechSynthesis.cancel();speechSynthesis.speak(u);
+  speechSynthesis.cancel();
+  setTimeout(()=>{
+    const u=new SpeechSynthesisUtterance(t);
+    u.lang='en-US';u.rate=.85;
+    speechSynthesis.speak(u);
+  },150);
 }
 
 // ── Error Recording ──
