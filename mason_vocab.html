@@ -294,7 +294,7 @@ header{
     <div style="display:flex;align-items:center;gap:8px;">
       <div id="vc">尚未載入</div>
       <div style="font-size:.68rem;font-weight:700;color:var(--muted);background:var(--orange-lt);
-        padding:3px 10px;border-radius:20px;border:1.5px solid var(--orange-md);">v2026.04.19</div>
+        padding:3px 10px;border-radius:20px;border:1.5px solid var(--orange-md);">v2026.04.19b</div>
     </div>
   </header>
 
@@ -571,7 +571,7 @@ function ldM1(){
   document.getElementById('m1chk').style.display='block';
   document.getElementById('m1nxt').style.display='none';
   document.getElementById('m1sync').style.display='none';
-  document.getElementById('m1-speak').className='speak-btn';
+  document.getElementById('m1-speak').className='speak-btn show';
   i.focus();
 }
 function chkM1(){
@@ -581,7 +581,7 @@ function chkM1(){
   if(v===cur.en.toLowerCase()){
     i.className='sinp ok';fb.className='fb show ok';
     fb.textContent= m1tries===0 ? '🎉 完全正確！太棒了！' : '✅ 答對了！繼續加油！';
-    document.getElementById('m1-speak').className='speak-btn';
+    document.getElementById('m1-speak').className='speak-btn show';
     m1done=true;i.disabled=true;
     document.getElementById('m1chk').style.display='none';
     document.getElementById('m1nxt').style.display='block';
@@ -591,8 +591,7 @@ function chkM1(){
     // First error: show speak button, let retry
     if(m1tries===1){
       speak(cur.en);
-      document.getElementById('m1-speak').className='speak-btn show';
-      fb.className='fb show bad';fb.textContent='✗ 拼錯了！先聽聽發音，再試一次！';
+      fb.className='fb show bad';fb.textContent='✗ 拼錯了！再聽聽發音，再試一次！';
       wrongs.push(cur);recErr(cur.row);
     }else if(m1tries===2){
       speak(cur.en);
@@ -645,7 +644,7 @@ function ldM3(){
   document.getElementById('m3mc').style.display='none';
   document.getElementById('m3nxt').style.display='none';
   document.getElementById('m3fbs').className='fb';
-  document.getElementById('m3-speak').className='speak-btn';
+  document.getElementById('m3-speak').className='speak-btn show';
   const i=document.getElementById('m3i');
   i.value='';i.className='sinp';i.disabled=false;i.focus();
 }
@@ -655,15 +654,14 @@ function chkM3(){
   if(v===cur.en.toLowerCase()){
     i.className='sinp ok';fb.className='fb show ok';
     fb.textContent=m3tries===0?'🎉 拼對了！進入第二關 Definition～':'✅ 答對了！進入第二關～';
-    document.getElementById('m3-speak').className='speak-btn';
+    document.getElementById('m3-speak').className='speak-btn show';
     i.disabled=true;setTimeout(ldMCQ,650);
   }else{
     m3tries++;
     i.className='sinp bad';
     if(m3tries===1){
       speak(cur.en);
-      document.getElementById('m3-speak').className='speak-btn show';
-      fb.className='fb show bad';fb.textContent='✗ 拼錯了！先聽聽發音，再試一次！';
+      fb.className='fb show bad';fb.textContent='✗ 拼錯了！再聽聽發音，再試一次！';
       wrongs.push(cur);recErr(cur.row);
     }else if(m3tries===2){
       speak(cur.en);
