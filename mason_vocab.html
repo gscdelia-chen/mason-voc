@@ -237,6 +237,32 @@ header{
 }
 @keyframes spin{to{transform:rotate(360deg);}}
 
+/* ── Count Selector ── */
+.count-selector{
+  display:none;margin-top:1.5rem;
+  background:var(--surface);border:3px solid var(--border);
+  border-radius:var(--radius);padding:1.2rem 1.4rem;
+  box-shadow:0 2px 12px rgba(249,115,22,.07);
+}
+.count-selector.show{display:block;animation:popInC .2s ease;}
+@keyframes popInC{from{transform:scale(.96);opacity:0;}to{transform:scale(1);opacity:1;}}
+.count-selector h4{font-size:.88rem;font-weight:900;color:var(--orange-dk);margin-bottom:.9rem;}
+.count-btns{display:flex;flex-wrap:wrap;gap:.5rem;margin-bottom:1rem;}
+.count-btn{
+  flex:1;min-width:60px;padding:.55rem .5rem;border:2.5px solid var(--border);
+  background:#fff;border-radius:var(--rsm);cursor:pointer;font-family:inherit;
+  font-size:.88rem;font-weight:800;color:var(--muted);transition:all .15s;
+}
+.count-btn:hover{border-color:var(--orange);color:var(--orange);background:var(--orange-lt);}
+.count-btn.selected{border-color:var(--orange);background:var(--orange);color:#fff;}
+.count-start{
+  width:100%;padding:.75rem;border:none;font-family:inherit;font-size:.95rem;font-weight:900;
+  border-radius:var(--rsm);cursor:pointer;
+  background:linear-gradient(135deg,var(--orange),#fb923c);color:#fff;
+  box-shadow:0 4px 16px rgba(249,115,22,.4);transition:all .15s;
+}
+.count-start:hover{transform:translateY(-1px);box-shadow:0 6px 24px rgba(249,115,22,.5);}
+
 /* Summary */
 .summary{text-align:center;padding:1.5rem 0;}
 .sum-trophy{font-size:4.5rem;animation:rockIt .7s ease-in-out infinite alternate;}
@@ -268,7 +294,7 @@ header{
     <div style="display:flex;align-items:center;gap:8px;">
       <div id="vc">尚未載入</div>
       <div style="font-size:.68rem;font-weight:700;color:var(--muted);background:var(--orange-lt);
-        padding:3px 10px;border-radius:20px;border:1.5px solid var(--orange-md);">v2025.04.19</div>
+        padding:3px 10px;border-radius:20px;border:1.5px solid var(--orange-md);">v2026.04.19</div>
     </div>
   </header>
 
@@ -314,6 +340,12 @@ header{
         </div>
         <div class="mode-arrow">›</div>
       </div>
+    </div>
+
+    <div class="count-selector" id="count-selector">
+      <h4>📚 要練習幾個生字？</h4>
+      <div class="count-btns" id="count-btns"></div>
+      <button class="count-start" onclick="confirmStart()">開始練習 →</button>
     </div>
   </div>
 
@@ -479,11 +511,45 @@ function cl(s){return s.replace(/^"+|"+$/g,'').trim();}
 function show(id){document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));document.getElementById(id).classList.add('active');}
 function goHome(){show('s-home');}
 function restartMode(){startMode(mode);}
+let selectedCount=0;
+
 function startMode(m){
-  mode=m;queue=shuf([...vocab]);idx=0;wrongs=[];
-  if(m===1){show('s-m1');ldM1();}
-  else if(m===2){show('s-m2');ldM2();}
-  else if(m===3){show('s-m3');ldM3();}
+  mode=m;
+  buildCountSelector();
+  document.getElementById('count-selector').className='count-selector show';
+  document.getElementById('count-selector').scrollIntoView({behavior:'smooth',block:'nearest'});
+}
+
+function buildCountSelector(){
+  const total=vocab.length;
+  const options=[10,20,30,50,total];
+  const labels={10:'10題',20:'20題',30:'30題',50:'50題'};
+  labels[total]='全部 ('+total+'題)';
+  const box=document.getElementById('count-btns');
+  box.innerHTML='';
+  options.filter(n=>n<=total).forEach(n=>{
+    const b=document.createElement('button');
+    b.className='count-btn'+(n===total?' selected':'');
+    b.textContent=labels[n]||n+'題';
+    b.dataset.count=n;
+    b.onclick=()=>{
+      document.querySelectorAll('.count-btn').forEach(x=>x.classList.remove('selected'));
+      b.classList.add('selected');
+      selectedCount=n;
+    };
+    box.appendChild(b);
+  });
+  selectedCount=total;
+}
+
+function confirmStart(){
+  const count=selectedCount||vocab.length;
+  queue=shuf([...vocab]).slice(0,count);
+  idx=0;wrongs=[];
+  document.getElementById('count-selector').className='count-selector';
+  if(mode===1){show('s-m1');ldM1();}
+  else if(mode===2){show('s-m2');ldM2();}
+  else if(mode===3){show('s-m3');ldM3();}
   else{show('s-m4');ldM4();}
 }
 function shuf(a){for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]];}return a;}
