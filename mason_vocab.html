@@ -201,7 +201,7 @@ header{
   padding:.82rem 1.1rem;cursor:pointer;font-family:inherit;font-size:.88rem;
   font-weight:700;color:var(--text);text-align:left;line-height:1.5;transition:all .18s;
 }
-.mopt:hover:not(:disabled){border-color:var(--orange);background:var(--orange-lt);color:var(--orange-dk);}
+.mopt:hover:not(:disabled),.mopt:focus:not(:disabled){border-color:var(--orange);background:var(--orange-lt);color:var(--orange-dk);outline:none;}
 .mopt.ok{background:var(--green-lt);border-color:var(--green);color:#14532d;}
 .mopt.bad{background:var(--red-lt);border-color:var(--red);color:#7f1d1d;}
 .mopt.hint{background:#f0fdf4;border-color:var(--green);color:#14532d;}
@@ -265,7 +265,11 @@ header{
 <div id="app">
   <header>
     <div class="logo">Mason<span>生字練習</span> 🚀</div>
-    <div id="vc">尚未載入</div>
+    <div style="display:flex;align-items:center;gap:8px;">
+      <div id="vc">尚未載入</div>
+      <div style="font-size:.68rem;font-weight:700;color:var(--muted);background:var(--orange-lt);
+        padding:3px 10px;border-radius:20px;border:1.5px solid var(--orange-md);">v2025.04.19</div>
+    </div>
   </header>
 
   <!-- HOME -->
@@ -540,7 +544,11 @@ function chkM1(){
   }
 }
 function nxtM1(){idx++;ldM1();}
-document.getElementById('m1i').addEventListener('keydown',e=>{if(e.key==='Enter')chkM1();});
+document.getElementById('m1i').addEventListener('keydown',e=>{
+  if(e.key!=='Enter')return;
+  if(!m1done){chkM1();}
+  else{nxtM1();}
+});
 
 // ── Mode 2 ──
 function ldM2(){
@@ -606,7 +614,53 @@ function chkM3(){
     setTimeout(()=>{i.className='sinp';i.focus();},360);
   }
 }
-document.getElementById('m3i').addEventListener('keydown',e=>{if(e.key==='Enter')chkM3();});
+document.getElementById('m3i').addEventListener('keydown',e=>{
+  if(e.key!=='Enter')return;
+  const spArea=document.getElementById('m3sp');
+  if(spArea.style.display==='none')return;
+  chkM3();
+});
+
+document.addEventListener('keydown',e=>{
+  const s1=document.getElementById('s-m1');
+  const s3=document.getElementById('s-m3');
+  const isM1=s1&&s1.classList.contains('active');
+  const isM3=s3&&s3.classList.contains('active');
+
+  if(e.key==='Enter'){
+    // m1: after answer, press Enter → next
+    if(isM1&&m1done){
+      const nxt=document.getElementById('m1nxt');
+      if(nxt&&nxt.style.display!=='none'){nxtM1();return;}
+    }
+    if(isM3){
+      // m3 next button
+      const nxt=document.getElementById('m3nxt');
+      if(nxt&&nxt.style.display!=='none'){nxtM3();return;}
+      // focused mopt → click it
+      const focused=document.activeElement;
+      if(focused&&focused.classList.contains('mopt')&&!focused.disabled){
+        focused.click();return;
+      }
+    }
+    return;
+  }
+
+  // Arrow key navigation for Definition MCQ in m3
+  if(!isM3)return;
+  if(e.key!=='ArrowDown'&&e.key!=='ArrowUp')return;
+  const mcArea=document.getElementById('m3mc');
+  if(!mcArea||mcArea.style.display==='none')return;
+  const opts=[...document.querySelectorAll('#m3opts .mopt:not(:disabled)')];
+  if(!opts.length)return;
+  e.preventDefault();
+  const focused=document.activeElement;
+  const curIdx=opts.indexOf(focused);
+  let nextIdx;
+  if(e.key==='ArrowDown') nextIdx=curIdx<opts.length-1?curIdx+1:0;
+  else nextIdx=curIdx>0?curIdx-1:opts.length-1;
+  opts[nextIdx].focus();
+});
 
 function ldMCQ(){
   document.getElementById('m3badge').textContent='📝 模式三 · 第二關：Definition';
@@ -622,10 +676,12 @@ function ldMCQ(){
   const pool=shuf(vocab.filter(v=>v.en!==cur.en&&(v.def||v.zh))).slice(0,3);
   const opts=shuf([{t:ans,c:true},...pool.map(v=>({t:v.def||v.zh,c:false}))]);
   const box=document.getElementById('m3opts');box.innerHTML='';
-  opts.forEach(o=>{
+  opts.forEach((o,i)=>{
     const b=document.createElement('button');b.className='mopt';b.textContent=o.t;
+    b.dataset.idx=i;
     b.onclick=()=>pickDef(b,o.c,ans);box.appendChild(b);
   });
+  box.querySelector('.mopt').focus();
 }
 function pickDef(btn,correct,ans){
   document.querySelectorAll('#m3opts .mopt').forEach(b=>b.disabled=true);
