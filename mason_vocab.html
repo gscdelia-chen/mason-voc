@@ -294,7 +294,7 @@ header{
     <div style="display:flex;align-items:center;gap:8px;">
       <div id="vc">尚未載入</div>
       <div style="font-size:.68rem;font-weight:700;color:var(--muted);background:var(--orange-lt);
-        padding:3px 10px;border-radius:20px;border:1.5px solid var(--orange-md);">v2026.04.19b</div>
+        padding:3px 10px;border-radius:20px;border:1.5px solid var(--orange-md);">v2026.04.19c</div>
     </div>
   </header>
 
@@ -592,7 +592,7 @@ function chkM1(){
     if(m1tries===1){
       speak(cur.en);
       fb.className='fb show bad';fb.textContent='✗ 拼錯了！再聽聽發音，再試一次！';
-      wrongs.push(cur);recErr(cur.row);
+      wrongs.push(cur);recErr(cur.row,v);
     }else if(m1tries===2){
       speak(cur.en);
       fb.className='fb show bad';fb.textContent='✗ 再試一次！你可以的 💪';
@@ -662,7 +662,7 @@ function chkM3(){
     if(m3tries===1){
       speak(cur.en);
       fb.className='fb show bad';fb.textContent='✗ 拼錯了！再聽聽發音，再試一次！';
-      wrongs.push(cur);recErr(cur.row);
+      wrongs.push(cur);recErr(cur.row,v);
     }else if(m3tries===2){
       speak(cur.en);
       fb.className='fb show bad';fb.textContent='✗ 再試一次！你可以的 💪';
