@@ -294,7 +294,7 @@ header{
     <div style="display:flex;align-items:center;gap:8px;">
       <div id="vc">尚未載入</div>
       <div style="font-size:.68rem;font-weight:700;color:var(--muted);background:var(--orange-lt);
-        padding:3px 10px;border-radius:20px;border:1.5px solid var(--orange-md);">v2026.04.25f</div>
+        padding:3px 10px;border-radius:20px;border:1.5px solid var(--orange-md);">v2026.04.25g</div>
     </div>
   </header>
 
@@ -345,6 +345,11 @@ header{
     <div class="count-selector" id="count-selector">
       <h4>📚 要練習幾個生字？</h4>
       <div class="count-btns" id="count-btns"></div>
+      <h4 style="margin-top:.9rem;margin-bottom:.5rem;">🔀 出題順序？</h4>
+      <div class="count-btns">
+        <button class="count-btn selected" id="order-random" onclick="setOrder('random')">🔀 隨機出題</button>
+        <button class="count-btn" id="order-seq" onclick="setOrder('seq')">📋 依照順序</button>
+      </div>
       <button class="count-start" onclick="confirmStart()">開始練習 →</button>
     </div>
   </div>
@@ -476,6 +481,7 @@ const SHEET_ID='';
 const SCRIPT_URL='https://script.google.com/macros/s/AKfycbw2IbdtYENvJcME71HSIlupMNCw63TqF9Z4Y8ahcdmpVnV8vZwqM_ZF76FrfGoJe5MmxQ/exec';
 
 let vocab=[],queue=[],idx=0,cur=null,wrongs=[],mode=0,m1done=false,m1tries=0,m3tries=0,m4tries=0,m1blockNext=false;
+let selectedOrder='random'; // 'random' | 'seq'
 
 // ── Fetch vocab ──
 async function fetchVocab(){
@@ -542,9 +548,19 @@ function buildCountSelector(){
   selectedCount=total;
 }
 
+function setOrder(o){
+  selectedOrder=o;
+  document.getElementById('order-random').className='count-btn'+(o==='random'?' selected':'');
+  document.getElementById('order-seq').className='count-btn'+(o==='seq'?' selected':'');
+}
+
 function confirmStart(){
   const count=selectedCount||vocab.length;
-  queue=shuf([...vocab]).slice(0,count);
+  if(selectedOrder==='seq'){
+    queue=[...vocab].slice(0,count);
+  }else{
+    queue=shuf([...vocab]).slice(0,count);
+  }
   idx=0;wrongs=[];
   document.getElementById('count-selector').className='count-selector';
   if(mode===1){show('s-m1');ldM1();}
@@ -617,6 +633,8 @@ document.getElementById('m1i').addEventListener('keydown',e=>{
   }
   if(e.key!=='Enter')return;
   e.preventDefault();
+  // input 若 disabled（顯示答案狀態），不在此處理 Enter，交給全域 keydown 的 m1nxt
+  if(e.target.disabled)return;
   if(!m1done){
     chkM1();
   }else{
@@ -697,6 +715,7 @@ document.getElementById('m3i').addEventListener('keydown',e=>{
   if(e.key!=='Enter')return;
   const spArea=document.getElementById('m3sp');
   if(spArea.style.display==='none')return;
+  if(e.target.disabled)return;
   chkM3();
 });
 
