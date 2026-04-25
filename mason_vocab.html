@@ -294,7 +294,7 @@ header{
     <div style="display:flex;align-items:center;gap:8px;">
       <div id="vc">尚未載入</div>
       <div style="font-size:.68rem;font-weight:700;color:var(--muted);background:var(--orange-lt);
-        padding:3px 10px;border-radius:20px;border:1.5px solid var(--orange-md);">v2026.04.25b/div>
+        padding:3px 10px;border-radius:20px;border:1.5px solid var(--orange-md);">v2026.04.25c/div>
     </div>
   </header>
 
@@ -588,14 +588,15 @@ function chkM1(){
   }else{
     m1tries++;
     i.className='sinp bad';
-    // First error: show speak button, let retry
     if(m1tries===1){
       speak(cur.en);
       fb.className='fb show bad';fb.textContent='✗ 拼錯了！再聽聽發音，再試一次！';
       wrongs.push(cur);recErr(cur.row,v);
+      setTimeout(()=>{i.className='sinp';i.value='';i.disabled=false;i.focus();},450);
     }else if(m1tries===2){
       speak(cur.en);
       fb.className='fb show bad';fb.textContent='✗ 再試一次！你可以的 💪';
+      setTimeout(()=>{i.className='sinp';i.value='';i.disabled=false;i.focus();},450);
     }else{
       speak(cur.en);
       i.value=cur.en;
@@ -607,9 +608,7 @@ function chkM1(){
       document.getElementById('m1chk').style.display='none';
       document.getElementById('m1nxt').style.display='block';
       document.getElementById('m1nxt').focus();
-      return;
     }
-    setTimeout(()=>{i.className='sinp';i.value='';i.disabled=false;i.focus();},450);
   }
 }
 function nxtM1(){idx++;ldM1();}
