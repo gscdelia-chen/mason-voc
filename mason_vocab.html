@@ -294,7 +294,7 @@ header{
     <div style="display:flex;align-items:center;gap:8px;">
       <div id="vc">尚未載入</div>
       <div style="font-size:.68rem;font-weight:700;color:var(--muted);background:var(--orange-lt);
-        padding:3px 10px;border-radius:20px;border:1.5px solid var(--orange-md);">v2026.04.25/div>
+        padding:3px 10px;border-radius:20px;border:1.5px solid var(--orange-md);">v2026.04.25b/div>
     </div>
   </header>
 
@@ -597,12 +597,16 @@ function chkM1(){
       speak(cur.en);
       fb.className='fb show bad';fb.textContent='✗ 再試一次！你可以的 💪';
     }else{
-      // 3rd fail: reveal answer
       speak(cur.en);
-      fb.className='fb show bad';fb.textContent='✗ 正確答案是：'+cur.en+'　記住它！';
+      i.value=cur.en;
+      i.className='sinp bad';
+      fb.className='fb show bad';
+      fb.textContent='✗ 正確答案是：'+cur.en+'　記住後按 Enter 繼續';
+      recErr(cur.row,v);
       m1done=true;i.disabled=true;
       document.getElementById('m1chk').style.display='none';
       document.getElementById('m1nxt').style.display='block';
+      document.getElementById('m1nxt').focus();
       return;
     }
     setTimeout(()=>{i.className='sinp';i.value='';i.disabled=false;i.focus();},450);
