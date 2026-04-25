@@ -294,7 +294,7 @@ header{
     <div style="display:flex;align-items:center;gap:8px;">
       <div id="vc">尚未載入</div>
       <div style="font-size:.68rem;font-weight:700;color:var(--muted);background:var(--orange-lt);
-        padding:3px 10px;border-radius:20px;border:1.5px solid var(--orange-md);">v2026.04.19c</div>
+        padding:3px 10px;border-radius:20px;border:1.5px solid var(--orange-md);">v2026.04.25/div>
     </div>
   </header>
 
@@ -363,7 +363,7 @@ header{
       <div class="wlabel">看中文，拼出英文</div>
       <div class="wmain" id="m1zh">—</div>
     </div>
-    <button class="speak-btn" id="m1-speak" onclick="speak(cur.en)">🔊 聽一下發音再試試看！</button>
+    <button class="speak-btn" id="m1-speak" onclick="speak(cur.en);setTimeout(()=>document.getElementById('m1i').focus(),200)">🔊 聽一下發音再試試看！</button>
     <input class="sinp" id="m1i" type="text" placeholder="輸入英文單字..."
       autocomplete="off" autocorrect="off" autocapitalize="none" spellcheck="false">
     <div class="fb" id="m1fb"></div>
@@ -610,6 +610,11 @@ function chkM1(){
 }
 function nxtM1(){idx++;ldM1();}
 document.getElementById('m1i').addEventListener('keydown',e=>{
+  if(e.key==='1'&&e.target.value===''){
+    e.preventDefault();
+    speak(cur.en);
+    return;
+  }
   if(e.key!=='Enter')return;
   if(!m1done){chkM1();}
   else{nxtM1();}
@@ -668,10 +673,19 @@ function chkM3(){
       fb.className='fb show bad';fb.textContent='✗ 再試一次！你可以的 💪';
     }else{
       speak(cur.en);
-      fb.className='fb show bad';fb.textContent='✗ 正確答案是：'+cur.en+'　記住它，進入下一關！';
+      i.value=cur.en;
+      i.className='sinp bad';
+      fb.className='fb show bad';
+      fb.textContent='✗ 正確答案是：'+cur.en+'　記住後按 Enter 繼續';
+      recErr(cur.row,v);
       i.disabled=true;
-      document.getElementById('m3-speak').className='speak-btn show';
-      setTimeout(ldMCQ,1200);
+      const contBtn=document.createElement('button');
+      contBtn.className='btn pri';contBtn.id='m3-spell-cont';
+      contBtn.textContent='記住了，繼續 →';
+      contBtn.style.marginTop='.6rem';
+      contBtn.onclick=()=>{contBtn.remove();ldMCQ();};
+      document.getElementById('m3sp').appendChild(contBtn);
+      contBtn.focus();
       return;
     }
     i.value='';
@@ -913,13 +927,14 @@ function speak(t){
 }
 
 // ── Error Recording ──
-function recErr(rowNum){
+function recErr(rowNum,wrongInput){
   const today=new Date().toISOString().slice(0,10);
   // Use GET with no-cors — request reaches GAS even without response
   const url=SCRIPT_URL
     +'?action=recordError'
     +'&rowNum='+rowNum
     +'&date='+today
+    +'&wrong='+encodeURIComponent(wrongInput||'')
     +'&sheetName='+encodeURIComponent('練習範圍');
   fetch(url,{mode:'no-cors'})
     .then(()=>{ document.getElementById('m1sync').style.display='block'; })
