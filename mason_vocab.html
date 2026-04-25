@@ -294,7 +294,7 @@ header{
     <div style="display:flex;align-items:center;gap:8px;">
       <div id="vc">尚未載入</div>
       <div style="font-size:.68rem;font-weight:700;color:var(--muted);background:var(--orange-lt);
-        padding:3px 10px;border-radius:20px;border:1.5px solid var(--orange-md);">v2026.04.25g</div>
+        padding:3px 10px;border-radius:20px;border:1.5px solid var(--orange-md);">v2026.04.25h</div>
     </div>
   </header>
 
@@ -482,6 +482,7 @@ const SCRIPT_URL='https://script.google.com/macros/s/AKfycbw2IbdtYENvJcME71HSIlu
 
 let vocab=[],queue=[],idx=0,cur=null,wrongs=[],mode=0,m1done=false,m1tries=0,m3tries=0,m4tries=0,m1blockNext=false;
 let selectedOrder='random'; // 'random' | 'seq'
+let m1showingAnswer=false;  // 第2次拼錯顯示答案期間，阻擋全域 Enter 跳題
 
 // ── Fetch vocab ──
 async function fetchVocab(){
@@ -598,7 +599,7 @@ function chkM1(){
     i.className='sinp ok';fb.className='fb show ok';
     fb.textContent= m1tries===0 ? '🎉 完全正確！太棒了！' : '✅ 答對了！繼續加油！';
     document.getElementById('m1-speak').className='speak-btn show';
-    m1done=true;i.disabled=true;
+    m1done=true;m1showingAnswer=false;i.disabled=true;
     document.getElementById('m1chk').style.display='none';
     document.getElementById('m1nxt').style.display='block';
   }else{
@@ -611,16 +612,20 @@ function chkM1(){
       if(!wrongs.find(w=>w.en===cur.en))wrongs.push(cur);
       setTimeout(()=>{i.className='sinp';i.value='';i.disabled=false;i.focus();},450);
     }else{
-      // 第2次錯：記錄F欄，顯示答案
+      // 第2次錯：記錄F欄，顯示答案，鎖住全域 Enter
       speak(cur.en);
       recErr(cur.row,v);
+      m1showingAnswer=true;
       i.value=cur.en;i.className='sinp bad';
       fb.className='fb show bad';
       fb.textContent='✗ 正確答案是：'+cur.en+'　記住後按 Enter 繼續';
       m1done=true;i.disabled=true;
       document.getElementById('m1chk').style.display='none';
       document.getElementById('m1nxt').style.display='block';
-      setTimeout(()=>document.getElementById('m1nxt').focus(),100);
+      setTimeout(()=>{
+        m1showingAnswer=false;
+        document.getElementById('m1nxt').focus();
+      },400);
     }
   }
 }
@@ -726,8 +731,8 @@ document.addEventListener('keydown',e=>{
   const isM3=s3&&s3.classList.contains('active');
 
   if(e.key==='Enter'){
-    // m1: after answer, press Enter → next
-    if(isM1&&m1done){
+    // m1: after answer, press Enter → next（m1showingAnswer 期間鎖住，避免顯示答案瞬間跳題）
+    if(isM1&&m1done&&!m1showingAnswer){
       const nxt=document.getElementById('m1nxt');
       if(nxt&&nxt.style.display!=='none'){nxtM1();return;}
     }
