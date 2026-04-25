@@ -294,7 +294,7 @@ header{
     <div style="display:flex;align-items:center;gap:8px;">
       <div id="vc">尚未載入</div>
       <div style="font-size:.68rem;font-weight:700;color:var(--muted);background:var(--orange-lt);
-        padding:3px 10px;border-radius:20px;border:1.5px solid var(--orange-md);">v2026.04.25e</div>
+        padding:3px 10px;border-radius:20px;border:1.5px solid var(--orange-md);">v2026.04.25f</div>
     </div>
   </header>
 
@@ -497,7 +497,7 @@ function parseCSV(txt){
   txt.trim().split('\n').slice(1).forEach((row,i)=>{
     const c=splitRow(row);
     const en=cl(c[0]);if(!en)return;
-    vocab.push({en,pos:cl(c[1]||''),zh:cl(c[2]||''),def:cl(c[3]||''),row:i+2});
+    vocab.push({en,pos:cl(c[1]||''),zh:cl(c[2]||''),def:cl(c[3]||''),example:cl(c[4]||''),row:i+2});
   });
 }
 function splitRow(row){
@@ -589,27 +589,22 @@ function chkM1(){
     m1tries++;
     i.className='sinp bad';
     if(m1tries===1){
+      // 第1次錯：只提示，不記錄
       speak(cur.en);
       fb.className='fb show bad';fb.textContent='✗ 拼錯了！再聽聽發音，再試一次！';
-      wrongs.push(cur);recErr(cur.row,v);
-      setTimeout(()=>{i.className='sinp';i.value='';i.disabled=false;i.focus();},450);
-    }else if(m1tries===2){
-      speak(cur.en);
-      fb.className='fb show bad';fb.textContent='✗ 再試一次！你可以的 💪';
+      if(!wrongs.find(w=>w.en===cur.en))wrongs.push(cur);
       setTimeout(()=>{i.className='sinp';i.value='';i.disabled=false;i.focus();},450);
     }else{
+      // 第2次錯：記錄F欄，顯示答案
       speak(cur.en);
-      i.value=cur.en;
-      i.className='sinp bad';
+      recErr(cur.row,v);
+      i.value=cur.en;i.className='sinp bad';
       fb.className='fb show bad';
       fb.textContent='✗ 正確答案是：'+cur.en+'　記住後按 Enter 繼續';
-      recErr(cur.row,v);
       m1done=true;i.disabled=true;
-      m1blockNext=true;
-      setTimeout(()=>{m1blockNext=false;},300);
       document.getElementById('m1chk').style.display='none';
       document.getElementById('m1nxt').style.display='block';
-      document.getElementById('m1nxt').focus();
+      setTimeout(()=>document.getElementById('m1nxt').focus(),100);
     }
   }
 }
@@ -624,7 +619,7 @@ document.getElementById('m1i').addEventListener('keydown',e=>{
   e.preventDefault();
   if(!m1done){
     chkM1();
-  }else if(!m1blockNext){
+  }else{
     nxtM1();
   }
 });
@@ -674,19 +669,19 @@ function chkM3(){
     m3tries++;
     i.className='sinp bad';
     if(m3tries===1){
+      // 第1次錯：只提示，不記錄
       speak(cur.en);
       fb.className='fb show bad';fb.textContent='✗ 拼錯了！再聽聽發音，再試一次！';
-      wrongs.push(cur);recErr(cur.row,v);
-    }else if(m3tries===2){
-      speak(cur.en);
-      fb.className='fb show bad';fb.textContent='✗ 再試一次！你可以的 💪';
+      if(!wrongs.find(w=>w.en===cur.en))wrongs.push(cur);
+      i.value='';
+      setTimeout(()=>{i.className='sinp';i.focus();},360);
     }else{
+      // 第2次錯：記錄F欄，顯示答案
       speak(cur.en);
-      i.value=cur.en;
-      i.className='sinp bad';
+      recErr(cur.row,v);
+      i.value=cur.en;i.className='sinp bad';
       fb.className='fb show bad';
       fb.textContent='✗ 正確答案是：'+cur.en+'　記住後按 Enter 繼續';
-      recErr(cur.row,v);
       i.disabled=true;
       const contBtn=document.createElement('button');
       contBtn.className='btn pri';contBtn.id='m3-spell-cont';
@@ -694,11 +689,8 @@ function chkM3(){
       contBtn.style.marginTop='.6rem';
       contBtn.onclick=()=>{contBtn.remove();ldMCQ();};
       document.getElementById('m3sp').appendChild(contBtn);
-      contBtn.focus();
-      return;
+      setTimeout(()=>contBtn.focus(),100);
     }
-    i.value='';
-    setTimeout(()=>{i.className='sinp';i.focus();},360);
   }
 }
 document.getElementById('m3i').addEventListener('keydown',e=>{
@@ -808,10 +800,12 @@ async function ldM4(){
     const distractors=shuf(vocab.filter(v=>v.en!==cur.en)).slice(0,3);
     const allWords=[cur,...distractors];
 
-    // Use cached sentence if available
+    // Use cached or example sentence, else call AI
     let sentence;
     if(m4sentenceCache[cur.en]){
       sentence=m4sentenceCache[cur.en];
+    }else if(cur.example){
+      sentence=cur.example;m4sentenceCache[cur.en]=sentence;
     }else{
       sentence=await generateSentence(cur);
       m4sentenceCache[cur.en]=sentence;
@@ -935,7 +929,7 @@ function speak(t){
   },150);
 }
 
-// ── Error Recording ──
+// ── Error Recording (只記F欄：日期:錯誤輸入) ──
 function recErr(rowNum,wrongInput){
   const today=new Date().toISOString().slice(0,10);
   // Use GET with no-cors — request reaches GAS even without response
@@ -944,6 +938,7 @@ function recErr(rowNum,wrongInput){
     +'&rowNum='+rowNum
     +'&date='+today
     +'&wrong='+encodeURIComponent(wrongInput||'')
+    +'&onlyF=1'
     +'&sheetName='+encodeURIComponent('練習範圍');
   fetch(url,{mode:'no-cors'})
     .then(()=>{ document.getElementById('m1sync').style.display='block'; })
