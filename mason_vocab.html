@@ -294,7 +294,7 @@ header{
     <div style="display:flex;align-items:center;gap:8px;">
       <div id="vc">尚未載入</div>
       <div style="font-size:.68rem;font-weight:700;color:var(--muted);background:var(--orange-lt);
-        padding:3px 10px;border-radius:20px;border:1.5px solid var(--orange-md);">v2026.04.25c/div>
+        padding:3px 10px;border-radius:20px;border:1.5px solid var(--orange-md);">v2026.04.25d</div>
     </div>
   </header>
 
@@ -619,8 +619,13 @@ document.getElementById('m1i').addEventListener('keydown',e=>{
     return;
   }
   if(e.key!=='Enter')return;
-  if(!m1done){chkM1();}
-  else{nxtM1();}
+  e.preventDefault();
+  if(!m1done){
+    chkM1();
+  }else{
+    // Small delay so 3rd-fail answer display isn't skipped immediately
+    setTimeout(nxtM1,50);
+  }
 });
 
 // ── Mode 2 ──
