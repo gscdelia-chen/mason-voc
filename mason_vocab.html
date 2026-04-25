@@ -294,7 +294,7 @@ header{
     <div style="display:flex;align-items:center;gap:8px;">
       <div id="vc">尚未載入</div>
       <div style="font-size:.68rem;font-weight:700;color:var(--muted);background:var(--orange-lt);
-        padding:3px 10px;border-radius:20px;border:1.5px solid var(--orange-md);">v2026.04.25d</div>
+        padding:3px 10px;border-radius:20px;border:1.5px solid var(--orange-md);">v2026.04.25e</div>
     </div>
   </header>
 
@@ -475,7 +475,7 @@ const CSV_URL='https://docs.google.com/spreadsheets/d/e/2PACX-1vRLUl6AnBghIZxCAq
 const SHEET_ID='';
 const SCRIPT_URL='https://script.google.com/macros/s/AKfycbw2IbdtYENvJcME71HSIlupMNCw63TqF9Z4Y8ahcdmpVnV8vZwqM_ZF76FrfGoJe5MmxQ/exec';
 
-let vocab=[],queue=[],idx=0,cur=null,wrongs=[],mode=0,m1done=false,m1tries=0,m3tries=0,m4tries=0;
+let vocab=[],queue=[],idx=0,cur=null,wrongs=[],mode=0,m1done=false,m1tries=0,m3tries=0,m4tries=0,m1blockNext=false;
 
 // ── Fetch vocab ──
 async function fetchVocab(){
@@ -605,6 +605,8 @@ function chkM1(){
       fb.textContent='✗ 正確答案是：'+cur.en+'　記住後按 Enter 繼續';
       recErr(cur.row,v);
       m1done=true;i.disabled=true;
+      m1blockNext=true;
+      setTimeout(()=>{m1blockNext=false;},300);
       document.getElementById('m1chk').style.display='none';
       document.getElementById('m1nxt').style.display='block';
       document.getElementById('m1nxt').focus();
@@ -622,9 +624,8 @@ document.getElementById('m1i').addEventListener('keydown',e=>{
   e.preventDefault();
   if(!m1done){
     chkM1();
-  }else{
-    // Small delay so 3rd-fail answer display isn't skipped immediately
-    setTimeout(nxtM1,50);
+  }else if(!m1blockNext){
+    nxtM1();
   }
 });
 
