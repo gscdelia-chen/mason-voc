@@ -294,7 +294,7 @@ header{
     <div style="display:flex;align-items:center;gap:8px;">
       <div id="vc">尚未載入</div>
       <div style="font-size:.68rem;font-weight:700;color:var(--muted);background:var(--orange-lt);
-        padding:3px 10px;border-radius:20px;border:1.5px solid var(--orange-md);">v2026.04.25h</div>
+        padding:3px 10px;border-radius:20px;border:1.5px solid var(--orange-md);">v2026.04.25i</div>
     </div>
   </header>
 
@@ -614,7 +614,7 @@ function chkM1(){
     }else{
       // 第2次錯：記錄F欄，顯示答案，鎖住全域 Enter
       speak(cur.en);
-      recErr(cur.row,v);
+      recErr(cur.row, v||'(blank)');
       m1showingAnswer=true;
       i.value=cur.en;i.className='sinp bad';
       fb.className='fb show bad';
@@ -701,7 +701,7 @@ function chkM3(){
     }else{
       // 第2次錯：記錄F欄，顯示答案
       speak(cur.en);
-      recErr(cur.row,v);
+      recErr(cur.row, v||'(blank)');
       i.value=cur.en;i.className='sinp bad';
       fb.className='fb show bad';
       fb.textContent='✗ 正確答案是：'+cur.en+'　記住後按 Enter 繼續';
