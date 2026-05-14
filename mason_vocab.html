@@ -294,7 +294,7 @@ header{
     <div style="display:flex;align-items:center;gap:8px;">
       <div id="vc">尚未載入</div>
       <div style="font-size:.68rem;font-weight:700;color:var(--muted);background:var(--orange-lt);
-        padding:3px 10px;border-radius:20px;border:1.5px solid var(--orange-md);">v2026.04.26a</div>
+        padding:3px 10px;border-radius:20px;border:1.5px solid var(--orange-md);">v2026.05.14a</div>
     </div>
   </header>
 
@@ -422,8 +422,14 @@ header{
       <div class="fb" id="m3fbs"></div>
       <button class="btn pri" onclick="chkM3()">✔ 確認</button>
     </div>
+    <div id="m3pos-area" style="display:none">
+      <div class="stage-div"><span>第二關：詞性選擇題</span></div>
+      <div class="mcq-title">🏷️ 這個單字的詞性是？</div>
+      <div class="mcq-list" id="m3pos-opts"></div>
+      <div class="fb" id="m3fbpos"></div>
+    </div>
     <div id="m3mc" style="display:none">
-      <div class="stage-div"><span>第二關：Definition 選擇題</span></div>
+      <div class="stage-div"><span>第三關：Definition 選擇題</span></div>
       <div class="mcq-title">📖 選出正確的英文定義：</div>
       <div class="mcq-list" id="m3opts"></div>
       <div class="fb" id="m3fbm"></div>
@@ -484,6 +490,9 @@ let vocab=[],queue=[],idx=0,cur=null,wrongs=[],mode=0,m1done=false,m1tries=0,m3t
 let selectedOrder='random'; // 'random' | 'seq'
 let m1showingAnswer=false;  // 第2次拼錯顯示答案期間，阻擋全域 Enter 跳題
 
+const ALL_POS=['n.','v.','adj.','adv.','prep.','conj.','pron.','interj.','vt.','vi.','n./v.','adj./adv.'];
+let discoveredPos=[];
+
 // ── Fetch vocab ──
 async function fetchVocab(){
   const btn=document.getElementById('fb-btn'),st=document.getElementById('fs');
@@ -500,12 +509,16 @@ async function fetchVocab(){
   btn.disabled=false;
 }
 function parseCSV(txt){
-  vocab=[];
+  vocab=[];discoveredPos=[];
+  const posSet=new Set();
   txt.trim().split('\n').slice(1).forEach((row,i)=>{
     const c=splitRow(row);
     const en=cl(c[0]);if(!en)return;
-    vocab.push({en,pos:cl(c[1]||''),zh:cl(c[2]||''),def:cl(c[3]||''),example:cl(c[4]||''),row:i+2});
+    const pos=cl(c[1]||'');
+    if(pos)posSet.add(pos);
+    vocab.push({en,pos,zh:cl(c[2]||''),def:cl(c[3]||''),example:cl(c[4]||''),row:i+2});
   });
+  discoveredPos=[...posSet];
 }
 function splitRow(row){
   const cols=[];let cur='',q=false;
@@ -673,6 +686,7 @@ function ldM3(){
   document.getElementById('m3main').textContent=cur.zh||cur.en;
   document.getElementById('m3pos').style.display='none';
   document.getElementById('m3sp').style.display='block';
+  document.getElementById('m3pos-area').style.display='none';
   document.getElementById('m3mc').style.display='none';
   document.getElementById('m3nxt').style.display='none';
   document.getElementById('m3fbs').className='fb';
@@ -685,21 +699,19 @@ function chkM3(){
   const fb=document.getElementById('m3fbs');
   if(v===cur.en.toLowerCase()){
     i.className='sinp ok';fb.className='fb show ok';
-    fb.textContent=m3tries===0?'🎉 拼對了！進入第二關 Definition～':'✅ 答對了！進入第二關～';
+    fb.textContent=m3tries===0?'🎉 拼對了！進入第二關～':'✅ 答對了！進入第二關～';
     document.getElementById('m3-speak').className='speak-btn show';
-    i.disabled=true;setTimeout(ldMCQ,650);
+    i.disabled=true;setTimeout(ldPOS,650);
   }else{
     m3tries++;
     i.className='sinp bad';
     if(m3tries===1){
-      // 第1次錯：只提示，不記錄
       speak(cur.en);
       fb.className='fb show bad';fb.textContent='✗ 拼錯了！再聽聽發音，再試一次！';
       if(!wrongs.find(w=>w.en===cur.en))wrongs.push(cur);
       i.value='';
       setTimeout(()=>{i.className='sinp';i.focus();},360);
     }else{
-      // 第2次錯：記錄F欄，顯示答案
       speak(cur.en);
       recErr(cur.row, v||'(blank)');
       i.value=cur.en;i.className='sinp bad';
@@ -710,7 +722,7 @@ function chkM3(){
       contBtn.className='btn pri';contBtn.id='m3-spell-cont';
       contBtn.textContent='記住了，繼續 →';
       contBtn.style.marginTop='.6rem';
-      contBtn.onclick=()=>{contBtn.remove();ldMCQ();};
+      contBtn.onclick=()=>{contBtn.remove();ldPOS();};
       document.getElementById('m3sp').appendChild(contBtn);
       setTimeout(()=>contBtn.focus(),100);
     }
@@ -749,12 +761,16 @@ document.addEventListener('keydown',e=>{
     return;
   }
 
-  // Arrow key navigation for Definition MCQ in m3
+  // Arrow key navigation for MCQ options in m3
   if(!isM3)return;
   if(e.key!=='ArrowDown'&&e.key!=='ArrowUp')return;
+  let listId=null;
+  const posArea=document.getElementById('m3pos-area');
   const mcArea=document.getElementById('m3mc');
-  if(!mcArea||mcArea.style.display==='none')return;
-  const opts=[...document.querySelectorAll('#m3opts .mopt:not(:disabled)')];
+  if(posArea&&posArea.style.display!=='none') listId='m3pos-opts';
+  else if(mcArea&&mcArea.style.display!=='none') listId='m3opts';
+  if(!listId)return;
+  const opts=[...document.querySelectorAll('#'+listId+' .mopt:not(:disabled)')];
   if(!opts.length)return;
   e.preventDefault();
   const focused=document.activeElement;
@@ -765,9 +781,53 @@ document.addEventListener('keydown',e=>{
   opts[nextIdx].focus();
 });
 
-function ldMCQ(){
-  document.getElementById('m3badge').textContent='📝 模式三 · 第二關：Definition';
+// Normalize POS: strip parentheses for comparison
+function normPos(p){ return p.replace(/[()]/g,'').trim(); }
+
+function ldPOS(){
+  document.getElementById('m3badge').textContent='📝 模式三 · 第二關：詞性';
   document.getElementById('m3sp').style.display='none';
+  document.getElementById('m3pos-area').style.display='block';
+  document.getElementById('m3fbpos').className='fb';
+
+  const correct=cur.pos||'n.';
+  const normCorrect=normPos(correct);
+  const seen=new Set([normCorrect]);
+  const allPool=[...new Set([...discoveredPos,...ALL_POS])];
+  const pool=[];
+  for(const p of shuf(allPool)){
+    const n=normPos(p);
+    if(!seen.has(n)){seen.add(n);pool.push(p);}
+    if(pool.length===3)break;
+  }
+  const opts=shuf([{t:correct,c:true},...pool.map(p=>({t:p,c:false}))]);
+  const box=document.getElementById('m3pos-opts');box.innerHTML='';
+  opts.forEach((o,i)=>{
+    const b=document.createElement('button');
+    b.className='mopt';b.textContent=o.t;
+    b.dataset.idx=i;
+    b.onclick=()=>pickPOS(b,o.c,correct);
+    box.appendChild(b);
+  });
+  box.querySelector('.mopt').focus();
+}
+
+function pickPOS(btn,correct,ans){
+  document.querySelectorAll('#m3pos-opts .mopt').forEach(b=>b.disabled=true);
+  const fb=document.getElementById('m3fbpos');
+  if(correct){
+    btn.className='mopt ok';fb.className='fb show ok';fb.textContent='✅ 正確！詞性答對了！進入第三關～';
+  }else{
+    btn.className='mopt bad';fb.className='fb show bad';fb.textContent='✗ 正確詞性是：'+ans;
+    document.querySelectorAll('#m3pos-opts .mopt').forEach(b=>{if(b.textContent===ans)b.className='mopt hint';});
+    wrongs.push(cur);
+  }
+  setTimeout(ldMCQ,700);
+}
+
+function ldMCQ(){
+  document.getElementById('m3badge').textContent='📝 模式三 · 第三關：Definition';
+  document.getElementById('m3pos-area').style.display='none';
   document.getElementById('m3mc').style.display='block';
   document.getElementById('m3lbl').textContent='這個單字的定義是？';
   document.getElementById('m3main').textContent=cur.en;
@@ -790,7 +850,7 @@ function pickDef(btn,correct,ans){
   document.querySelectorAll('#m3opts .mopt').forEach(b=>b.disabled=true);
   const fb=document.getElementById('m3fbm');
   if(correct){
-    btn.className='mopt ok';fb.className='fb show ok';fb.textContent='🏆 答對了！兩關全過！';
+    btn.className='mopt ok';fb.className='fb show ok';fb.textContent='🏆 答對了！三關全過！';
   }else{
     btn.className='mopt bad';fb.className='fb show bad';fb.textContent='✗ 正確答案：'+ans;
     document.querySelectorAll('#m3opts .mopt').forEach(b=>{if(b.textContent===ans)b.className='mopt hint';});
