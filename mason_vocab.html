@@ -294,7 +294,7 @@ header{
     <div style="display:flex;align-items:center;gap:8px;">
       <div id="vc">尚未載入</div>
       <div style="font-size:.68rem;font-weight:700;color:var(--muted);background:var(--orange-lt);
-        padding:3px 10px;border-radius:20px;border:1.5px solid var(--orange-md);">v2026.05.14a</div>
+        padding:3px 10px;border-radius:20px;border:1.5px solid var(--orange-md);">v2026.05.14b</div>
     </div>
   </header>
 
@@ -741,6 +741,26 @@ document.addEventListener('keydown',e=>{
   const s3=document.getElementById('s-m3');
   const isM1=s1&&s1.classList.contains('active');
   const isM3=s3&&s3.classList.contains('active');
+
+  // '1' 鍵發音：模式一（輸入框空白或未 focus 時）
+  if(e.key==='1'&&isM1){
+    const inp=document.getElementById('m1i');
+    if(document.activeElement!==inp||inp.value===''){
+      e.preventDefault();speak(cur.en);
+      setTimeout(()=>inp.focus(),200);return;
+    }
+  }
+  // '1' 鍵發音：模式三第一關拼字階段
+  if(e.key==='1'&&isM3){
+    const spArea=document.getElementById('m3sp');
+    if(spArea&&spArea.style.display!=='none'){
+      const inp=document.getElementById('m3i');
+      if(document.activeElement!==inp||inp.value===''){
+        e.preventDefault();speak(cur.en);
+        setTimeout(()=>inp.focus(),200);return;
+      }
+    }
+  }
 
   if(e.key==='Enter'){
     // m1: after answer, press Enter → next（m1showingAnswer 期間鎖住，避免顯示答案瞬間跳題）
