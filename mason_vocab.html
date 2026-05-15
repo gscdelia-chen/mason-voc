@@ -294,7 +294,7 @@ header{
     <div style="display:flex;align-items:center;gap:8px;">
       <div id="vc">尚未載入</div>
       <div style="font-size:.68rem;font-weight:700;color:var(--muted);background:var(--orange-lt);
-        padding:3px 10px;border-radius:20px;border:1.5px solid var(--orange-md);">v2026.05.14b</div>
+        padding:3px 10px;border-radius:20px;border:1.5px solid var(--orange-md);">v2026.05.14c</div>
     </div>
   </header>
 
@@ -473,6 +473,21 @@ header{
         <h4>💪 需要加強的單字</h4>
         <div id="swrows"></div>
       </div>
+      <!-- 模式三專用：分關錯誤列表 -->
+      <div id="swl-m3" style="display:none">
+        <div id="swl-spell" style="display:none">
+          <h4>✏️ 拼寫錯誤</h4>
+          <div id="swrows-spell"></div>
+        </div>
+        <div id="swl-pos" style="display:none">
+          <h4>🏷️ 詞性錯誤</h4>
+          <div id="swrows-pos"></div>
+        </div>
+        <div id="swl-def" style="display:none">
+          <h4>📖 Definition 錯誤</h4>
+          <div id="swrows-def"></div>
+        </div>
+      </div>
       <div class="sbtns">
         <button class="btn pri" onclick="goHome()">🏠 回首頁</button>
         <button class="btn gho" onclick="restartMode()">🔁 再練一次</button>
@@ -487,8 +502,9 @@ const SHEET_ID='';
 const SCRIPT_URL='https://script.google.com/macros/s/AKfycbw2IbdtYENvJcME71HSIlupMNCw63TqF9Z4Y8ahcdmpVnV8vZwqM_ZF76FrfGoJe5MmxQ/exec';
 
 let vocab=[],queue=[],idx=0,cur=null,wrongs=[],mode=0,m1done=false,m1tries=0,m3tries=0,m4tries=0,m1blockNext=false;
-let selectedOrder='random'; // 'random' | 'seq'
-let m1showingAnswer=false;  // 第2次拼錯顯示答案期間，阻擋全域 Enter 跳題
+let selectedOrder='random';
+let m1showingAnswer=false;
+let wrongsSpell=[],wrongsPOS=[],wrongsDef=[]; // 模式三專用
 
 const ALL_POS=['n.','v.','adj.','adv.','prep.','conj.','pron.','interj.','vt.','vi.','n./v.','adj./adv.'];
 let discoveredPos=[];
@@ -680,6 +696,7 @@ function nxtM2(){idx++;ldM2();}
 // ── Mode 3 ──
 function ldM3(){
   if(idx>=queue.length){sumUp();return;}
+  if(idx===0){wrongsSpell=[];wrongsPOS=[];wrongsDef=[];}
   cur=queue[idx];m3tries=0;setProg('p3','cnt3');
   document.getElementById('m3badge').textContent='📝 模式三 · 第一關：拼字';
   document.getElementById('m3lbl').textContent='看中文，拼出英文';
@@ -708,12 +725,15 @@ function chkM3(){
     if(m3tries===1){
       speak(cur.en);
       fb.className='fb show bad';fb.textContent='✗ 拼錯了！再聽聽發音，再試一次！';
+      if(!wrongsSpell.find(w=>w.en===cur.en))wrongsSpell.push(cur);
       if(!wrongs.find(w=>w.en===cur.en))wrongs.push(cur);
       i.value='';
       setTimeout(()=>{i.className='sinp';i.focus();},360);
     }else{
       speak(cur.en);
       recErr(cur.row, v||'(blank)');
+      if(!wrongsSpell.find(w=>w.en===cur.en))wrongsSpell.push(cur);
+      if(!wrongs.find(w=>w.en===cur.en))wrongs.push(cur);
       i.value=cur.en;i.className='sinp bad';
       fb.className='fb show bad';
       fb.textContent='✗ 正確答案是：'+cur.en+'　記住後按 Enter 繼續';
@@ -840,7 +860,8 @@ function pickPOS(btn,correct,ans){
   }else{
     btn.className='mopt bad';fb.className='fb show bad';fb.textContent='✗ 正確詞性是：'+ans;
     document.querySelectorAll('#m3pos-opts .mopt').forEach(b=>{if(b.textContent===ans)b.className='mopt hint';});
-    wrongs.push(cur);
+    if(!wrongsPOS.find(w=>w.en===cur.en))wrongsPOS.push(cur);
+    if(!wrongs.find(w=>w.en===cur.en))wrongs.push(cur);
   }
   setTimeout(ldMCQ,700);
 }
@@ -874,6 +895,7 @@ function pickDef(btn,correct,ans){
   }else{
     btn.className='mopt bad';fb.className='fb show bad';fb.textContent='✗ 正確答案：'+ans;
     document.querySelectorAll('#m3opts .mopt').forEach(b=>{if(b.textContent===ans)b.className='mopt hint';});
+    if(!wrongsDef.find(w=>w.en===cur.en))wrongsDef.push(cur);
     if(!wrongs.find(w=>w.en===cur.en))wrongs.push(cur);
   }
   document.getElementById('m3nxt').style.display='block';
@@ -1011,14 +1033,35 @@ function sumUp(){
   document.getElementById('sum-trophy').textContent=pct>=80?'🏆':pct>=60?'🌟':'💪';
   document.getElementById('spct').textContent=pct+'%';
   document.getElementById('ssub').textContent=`${tot} 題中答對 ${ok} 題！${pct>=80?'超棒的！':'繼續加油！'}`;
-  const wl=document.getElementById('swl');
-  if(wc>0){
-    wl.style.display='block';
-    const uniq=[...new Map(wrongs.map(w=>[w.en,w])).values()];
-    document.getElementById('swrows').innerHTML=uniq.map(w=>
-      `<div class="wrow"><span class="wen">${w.en}</span><span class="wzh">${w.zh}</span></div>`
-    ).join('');
-  }else wl.style.display='none';
+
+  if(mode===3){
+    document.getElementById('swl').style.display='none';
+    const m3block=document.getElementById('swl-m3');
+    const hasAny=wrongsSpell.length||wrongsPOS.length||wrongsDef.length;
+    m3block.style.display=hasAny?'block':'none';
+    function fillSection(listId,rowsId,arr){
+      const el=document.getElementById(listId);
+      if(arr.length){
+        el.style.display='block';
+        document.getElementById(rowsId).innerHTML=arr.map(w=>
+          `<div class="wrow"><span class="wen">${w.en}</span><span class="wzh">${w.zh}</span></div>`
+        ).join('');
+      }else el.style.display='none';
+    }
+    fillSection('swl-spell','swrows-spell',wrongsSpell);
+    fillSection('swl-pos','swrows-pos',wrongsPOS);
+    fillSection('swl-def','swrows-def',wrongsDef);
+  }else{
+    document.getElementById('swl-m3').style.display='none';
+    const wl=document.getElementById('swl');
+    if(wc>0){
+      wl.style.display='block';
+      const uniq=[...new Map(wrongs.map(w=>[w.en,w])).values()];
+      document.getElementById('swrows').innerHTML=uniq.map(w=>
+        `<div class="wrow"><span class="wen">${w.en}</span><span class="wzh">${w.zh}</span></div>`
+      ).join('');
+    }else wl.style.display='none';
+  }
   show('s-sum');
 }
 
