@@ -521,7 +521,7 @@
     </div>
     <div style="display:flex; flex-direction:column; align-items:flex-end; gap:4px; flex-shrink:0">
       <span class="header-badge">Beta 試填版</span>
-      <span style="font-size:0.68rem; color:rgba(255,255,255,0.55); letter-spacing:0.04em">v3 ｜ 2026-05-26</span>
+      <span style="font-size:0.68rem; color:rgba(255,255,255,0.55); letter-spacing:0.04em">v3.2 ｜ 2026-05-26</span>
     </div>
   </div>
 </header>
@@ -693,7 +693,7 @@
   <div class="section-header">
     <div class="section-label">步驟四 / 五</div>
     <h2 class="section-title">效益文字</h2>
-    <p class="section-desc">以下是 AI 根據您的資料產出的效益文字。您可以直接使用，或點選「編輯修改」進行調整。系統將同時保留 AI 原始版本與您的修改版本。</p>
+    <p class="section-desc">以下是 AI 根據您的資料產出的效益文字。您可以直接使用，或點選「編輯修改」進行調整。</p>
   </div>
 
   <div class="output-box">
@@ -769,6 +769,11 @@
     <div class="check">✦</div>
     <h2>感謝您的參與</h2>
     <p>您的填答已成功送出。<br>如您選擇回寄，效益文字與填答紀錄將寄送至您的信箱。</p>
+  </div>
+
+  <!-- 免責聲明 -->
+  <div class="info-box" style="margin-bottom:20px; background:#fef9ec; border-left-color:#d97706; color:#78350f;">
+    本工具旨在協助您撰寫效益說明。產出的文字僅供參考，您可視需求彈性運用（例如調整後納入期末報告）。引用或貼出前，請務必再次審閱與把關，以確保內容的準確性。
   </div>
 
   <div class="finish-card" id="surveyLinkCard" style="display:none">
@@ -971,7 +976,7 @@ let trackUserEvalA     = '';  // 老師對評估問題的回答
 
 const API_KEY         = 'AIzaSyC-7L15d7ZWm0ioUYg4trz1jjhN55wKaFU'; // 換成你的 Gemini API Key
 const GEMINI_MODEL    = 'gemini-flash-latest';       // 可換成 gemini-1.5-pro
-const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycby-g-S7-l_qDkUvsn3P9TVTpwMX6-50hC2Ekn_DGWZUv42JyBuMFqK31F5MG2HkZ1YA/exec'; // 換成部署後的 Apps Script 網址
+const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbw0ApwJCbvPDwbqmNZ3dsN0c3X-4bhi-2-VK0Tdc0SHLdyQwbJ-S-jgOuqchpuRf4F6/exec'; // 換成部署後的 Apps Script 網址
 
 // 產生 Session ID（每次開啟頁面自動產生，識別同一次填答）
 const SESSION_ID = 'sess_' + Date.now() + '_' + Math.random().toString(36).substring(2, 7);
@@ -1393,7 +1398,11 @@ function getSystemPrompt() {
 - D型研究特別追問「這些資料讓誰可以做什麼原本做不到的事」
 - 人文學科接受質化描述但要具體；社會科學留意政策影響；應用型留意實務推廣
 - 語感像台灣學術社群的人在說話，不像翻譯自英文的報告
-- 全程老師最多回應兩次（補充缺口＋確認草稿）`;
+- 全程老師最多回應兩次（補充缺口＋確認草稿）
+- 提到政府機關或補助單位時，一律使用「國科會」，不使用「科技部」
+- 避免使用「長期影響力」、「長遠影響」等說法，因本工具用於單一專題計畫結案，應聚焦在計畫執行期間內的具體成果與效益
+- 產出效益文字後，不要說「祝申請順利」、「研究成果豐碩」或任何祝賀語，也不要說「您可以直接複製貼入計畫書」之類的話
+- 條列關鍵成果時，每點用「•」開頭純文字呈現，不使用任何 Markdown 語法（不用 **粗體**、不用 ## 標題、不用 --- 分隔線）`;
 }
 
 // ══════════════════════════════════════════
