@@ -971,7 +971,7 @@ let trackUserEvalA     = '';  // 老師對評估問題的回答
 
 const API_KEY         = 'AIzaSyC-7L15d7ZWm0ioUYg4trz1jjhN55wKaFU'; // 換成你的 Gemini API Key
 const GEMINI_MODEL    = 'gemini-flash-latest';       // 可換成 gemini-1.5-pro
-const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxAWhFSZGDLBGJVuaC_ptNqA5QV31Y3aIUlEzjOmaU3pqUQKArdG-1mHCxNybxXrlPp/exec'; // 換成部署後的 Apps Script 網址
+const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycby-g-S7-l_qDkUvsn3P9TVTpwMX6-50hC2Ekn_DGWZUv42JyBuMFqK31F5MG2HkZ1YA/exec'; // 換成部署後的 Apps Script 網址
 
 // 產生 Session ID（每次開啟頁面自動產生，識別同一次填答）
 const SESSION_ID = 'sess_' + Date.now() + '_' + Math.random().toString(36).substring(2, 7);
@@ -1015,7 +1015,7 @@ async function saveProgress(status) {
     const res = await fetch(APPS_SCRIPT_URL, {
       method: 'POST',
       mode: 'no-cors',
-      headers: { 'Content-Type': 'application/json' },
+      headers: { 'Content-Type': 'text/plain' },
       body: JSON.stringify(payload)
     });
     console.log('saveProgress 送出成功：', status);
