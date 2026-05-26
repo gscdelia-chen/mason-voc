@@ -957,10 +957,18 @@ let selectedTypes = [];
 let currentDomain = '人文';
 let conversationHistory = [];
 let aiFinalText = '';
+let aiDraftText = '';
 let isWaiting = false;
+
+// 追蹤各階段問答內容（供送出 Google Sheet 使用）
+let trackAiFollowUpQ  = '';  // AI 缺口追問題目
+let trackUserFollowUpA = ''; // 老師對追問的回答
+let trackAiEvalQ      = '';  // AI 草稿評估問題
+let trackUserEvalA    = '';  // 老師對評估問題的回答
 
 const API_KEY = 'AIzaSyA5nq4t17h6XYHfNrlQnXDbEdE0aJiPbxY'; // 換成你的 Gemini API Key
 const GEMINI_MODEL = 'gemini-flash-latest';  // 可換成 gemini-1.5-pro 品質更高但較慢
+const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzYuSgjMeHvA_B19ayP6Gd84PkZCLcQzRTkQn0qcKC24U7-CSLv_JnB9mvPY2DivGUD/exec'; // 換成部署後的 Apps Script 網址
 
 // ══════════════════════════════════════════
 // 初始化
@@ -1123,6 +1131,17 @@ ${supplement ? '\n補充資料：\n' + supplement : ''}`.trim();
     conversationHistory.push({ role: 'user', content: userContent });
     conversationHistory.push({ role: 'assistant', content: response });
     showChatInput();
+
+    // 追蹤：第一次 AI 回應
+    if (response.includes('【草稿版效益文字】')) {
+      // AI 直接產出草稿（無追問）
+      aiDraftText = extractText(response, '【草稿版效益文字】');
+      trackAiEvalQ = extractEvalQ(response);
+    } else {
+      // AI 有追問缺口
+      trackAiFollowUpQ = response;
+    }
+
     if (response.includes('【最終版效益文字】')) {
       aiFinalText = extractText(response, '【最終版效益文字】');
       setTimeout(() => moveToOutputStep(), 1200);
@@ -1141,6 +1160,14 @@ async function sendUserMessage() {
   addUserMessage(msg);
   conversationHistory.push({ role: 'user', content: msg });
 
+  // 追蹤老師的回答屬於哪個階段
+  const isFollowUpPhase = !aiDraftText; // 草稿還沒產出 → 還在追問階段
+  if (isFollowUpPhase) {
+    trackUserFollowUpA = msg;
+  } else {
+    trackUserEvalA = msg;
+  }
+
   showTyping();
   isWaiting = true;
   document.getElementById('chatSendBtn').disabled = true;
@@ -1153,6 +1180,12 @@ async function sendUserMessage() {
   if (response) {
     addAIMessage(response);
     conversationHistory.push({ role: 'assistant', content: response });
+
+    // 追蹤：後續 AI 回應
+    if (response.includes('【草稿版效益文字】') && !aiDraftText) {
+      aiDraftText = extractText(response, '【草稿版效益文字】');
+      trackAiEvalQ = extractEvalQ(response);
+    }
     if (response.includes('【最終版效益文字】')) {
       aiFinalText = extractText(response, '【最終版效益文字】');
       setTimeout(() => moveToOutputStep(), 1200);
@@ -1160,6 +1193,24 @@ async function sendUserMessage() {
   } else {
     document.getElementById('chatError').classList.add('show');
   }
+}
+
+// 從 AI 回應中取出評估問題部分（草稿之後的文字）
+function extractEvalQ(text) {
+  const marker = '【草稿版效益文字】';
+  const idx = text.indexOf(marker);
+  if (idx === -1) return '';
+  // 草稿內容結束後的部分即為評估問題
+  const afterDraft = text.substring(idx + marker.length);
+  // 找到條列成果結尾（最後一個「•」行之後）
+  const lines = afterDraft.split('\n');
+  let pastBullets = false;
+  let evalLines = [];
+  for (const line of lines) {
+    if (line.trim().startsWith('•')) { pastBullets = true; continue; }
+    if (pastBullets && line.trim() !== '') evalLines.push(line);
+  }
+  return evalLines.join('\n').trim();
 }
 
 function extractText(text, marker) {
@@ -1215,7 +1266,7 @@ async function callAI(systemPrompt, firstMsg, history) {
       body: JSON.stringify({
         contents,
         generationConfig: {
-          maxOutputTokens: 1500,
+          maxOutputTokens: 3000,
           temperature: 0.7
         }
       })
@@ -1388,13 +1439,59 @@ function toggleEmailInput(show) {
   document.getElementById('emailWrap').classList.toggle('show', show);
 }
 
-function submitAll() {
+async function submitAll() {
   const emailOpt = document.querySelector('input[name="emailOpt"]:checked')?.value;
   const surveyOpt = document.querySelector('input[name="surveyOpt"]:checked')?.value;
   const email = document.getElementById('userEmail').value.trim();
   if (emailOpt === 'yes' && !email) { alert('請填寫您的 Email'); return; }
 
-  const finalText = document.getElementById('editContent').value.trim() || aiFinalText;
+  const editedText = document.getElementById('editContent').value.trim();
+  const finalText = editedText || aiFinalText;
+
+  // 整理學門全名
+  let discFullName = selectedDisc;
+  for (const d of Object.values(DOMAINS)) {
+    const found = d.find(x => x.id === selectedDisc);
+    if (found) { discFullName = found.sub ? `${found.name}（${found.sub}）` : found.name; break; }
+  }
+
+  // 整理研究類型
+  const typeLabel = selectedTypes.map(t => ({
+    A:'純基礎研究', B:'應用導向基礎研究', C:'純應用研究', D:'基礎建設型研究'
+  }[t])).join('、');
+
+  // 準備送出的資料
+  const payload = {
+    planName:       document.getElementById('planName').value.trim(),
+    discipline:     discFullName,
+    researchTypes:  typeLabel,
+    abstract:       document.getElementById('abstract').value.trim(),
+    supplement:     document.getElementById('supplement').value.trim(),
+    aiFollowUpQ:    trackAiFollowUpQ,
+    userFollowUpA:  trackUserFollowUpA,
+    aiDraftText:    aiDraftText,
+    aiEvalQ:        trackAiEvalQ,
+    userEvalA:      trackUserEvalA,
+    aiFinalText:    aiFinalText,
+    userEditedText: editedText,
+    email:          emailOpt === 'yes' ? email : '',
+    surveyConsent:  surveyOpt === 'yes' ? '是' : '否'
+  };
+
+  // 送出到 Google Apps Script
+  try {
+    await fetch(APPS_SCRIPT_URL, {
+      method: 'POST',
+      mode: 'no-cors', // Apps Script 需要 no-cors
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload)
+    });
+  } catch (err) {
+    console.error('送出資料失敗：', err);
+    // 即使送出失敗，仍讓老師看到完成頁面
+  }
+
+  // 顯示完成頁
   document.getElementById('finalOutputDisplay').textContent = finalText;
   if (surveyOpt === 'yes') document.getElementById('surveyLinkCard').style.display = 'block';
 
