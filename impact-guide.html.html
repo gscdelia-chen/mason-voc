@@ -960,15 +960,65 @@ let aiFinalText = '';
 let aiDraftText = '';
 let isWaiting = false;
 
-// 追蹤各階段問答內容（供送出 Google Sheet 使用）
-let trackAiFollowUpQ  = '';  // AI 缺口追問題目
-let trackUserFollowUpA = ''; // 老師對追問的回答
-let trackAiEvalQ      = '';  // AI 草稿評估問題
-let trackUserEvalA    = '';  // 老師對評估問題的回答
+// 追蹤各階段問答內容（供存入 Google Sheet 使用）
+let trackAiFollowUpQ   = '';  // AI 缺口追問題目
+let trackUserFollowUpA = '';  // 老師對追問的回答
+let trackAiEvalQ       = '';  // AI 草稿評估問題
+let trackUserEvalA     = '';  // 老師對評估問題的回答
 
-const API_KEY = 'AIzaSyA5nq4t17h6XYHfNrlQnXDbEdE0aJiPbxY'; // 換成你的 Gemini API Key
-const GEMINI_MODEL = 'gemini-flash-latest';  // 可換成 gemini-1.5-pro 品質更高但較慢
-const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzYuSgjMeHvA_B19ayP6Gd84PkZCLcQzRTkQn0qcKC24U7-CSLv_JnB9mvPY2DivGUD/exec'; // 換成部署後的 Apps Script 網址
+const API_KEY         = 'AIzaSyA5nq4t17h6XYHfNrlQnXDbEdE0aJiPbxY'; // 換成你的 Gemini API Key
+const GEMINI_MODEL    = 'gemini-flash-latest';       // 可換成 gemini-1.5-pro
+const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxAWhFSZGDLBGJVuaC_ptNqA5QV31Y3aIUlEzjOmaU3pqUQKArdG-1mHCxNybxXrlPp/exec'; // 換成部署後的 Apps Script 網址
+
+// 產生 Session ID（每次開啟頁面自動產生，識別同一次填答）
+const SESSION_ID = 'sess_' + Date.now() + '_' + Math.random().toString(36).substring(2, 7);
+
+// ── 分階段存檔到 Google Sheet ──
+async function saveProgress(status) {
+  if (!APPS_SCRIPT_URL || APPS_SCRIPT_URL === 'YOUR_APPS_SCRIPT_URL_HERE') return;
+
+  // 整理學門全名
+  let discFullName = selectedDisc;
+  for (const d of Object.values(DOMAINS)) {
+    const found = d.find(x => x.id === selectedDisc);
+    if (found) { discFullName = found.sub ? `${found.name}（${found.sub}）` : found.name; break; }
+  }
+
+  // 整理研究類型
+  const typeLabel = selectedTypes.map(t => ({
+    A:'純基礎研究', B:'應用導向基礎研究', C:'純應用研究', D:'基礎建設型研究'
+  }[t])).join('、');
+
+  const payload = {
+    sessionId:      SESSION_ID,
+    status:         status,
+    planName:       document.getElementById('planName')?.value.trim() || '',
+    discipline:     discFullName,
+    researchTypes:  typeLabel,
+    abstract:       document.getElementById('abstract')?.value.trim() || '',
+    supplement:     document.getElementById('supplement')?.value.trim() || '',
+    aiFollowUpQ:    trackAiFollowUpQ,
+    userFollowUpA:  trackUserFollowUpA,
+    aiDraftText:    aiDraftText,
+    aiEvalQ:        trackAiEvalQ,
+    userEvalA:      trackUserEvalA,
+    aiFinalText:    aiFinalText,
+    userEditedText: document.getElementById('editContent')?.value.trim() || '',
+    email:          document.getElementById('userEmail')?.value.trim() || '',
+    surveyConsent:  document.querySelector('input[name="surveyOpt"]:checked')?.value === 'yes' ? '是' : ''
+  };
+
+  try {
+    await fetch(APPS_SCRIPT_URL, {
+      method: 'POST',
+      mode: 'no-cors',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload)
+    });
+  } catch (err) {
+    console.error('saveProgress 失敗：', err);
+  }
+}
 
 // ══════════════════════════════════════════
 // 初始化
@@ -1093,6 +1143,10 @@ function goStep(n) {
   const t = document.getElementById('step' + n);
   if (t) t.classList.add('visible');
   window.scrollTo({ top: 0, behavior: 'smooth' });
+
+  // 各步驟切換時存檔
+  const statusMap = { 2: 'Step1完成', 3: 'Step2完成', 4: 'Step3完成', 5: 'Step4完成' };
+  if (statusMap[n]) saveProgress(statusMap[n]);
 }
 
 // ══════════════════════════════════════════
@@ -1448,48 +1502,8 @@ async function submitAll() {
   const editedText = document.getElementById('editContent').value.trim();
   const finalText = editedText || aiFinalText;
 
-  // 整理學門全名
-  let discFullName = selectedDisc;
-  for (const d of Object.values(DOMAINS)) {
-    const found = d.find(x => x.id === selectedDisc);
-    if (found) { discFullName = found.sub ? `${found.name}（${found.sub}）` : found.name; break; }
-  }
-
-  // 整理研究類型
-  const typeLabel = selectedTypes.map(t => ({
-    A:'純基礎研究', B:'應用導向基礎研究', C:'純應用研究', D:'基礎建設型研究'
-  }[t])).join('、');
-
-  // 準備送出的資料
-  const payload = {
-    planName:       document.getElementById('planName').value.trim(),
-    discipline:     discFullName,
-    researchTypes:  typeLabel,
-    abstract:       document.getElementById('abstract').value.trim(),
-    supplement:     document.getElementById('supplement').value.trim(),
-    aiFollowUpQ:    trackAiFollowUpQ,
-    userFollowUpA:  trackUserFollowUpA,
-    aiDraftText:    aiDraftText,
-    aiEvalQ:        trackAiEvalQ,
-    userEvalA:      trackUserEvalA,
-    aiFinalText:    aiFinalText,
-    userEditedText: editedText,
-    email:          emailOpt === 'yes' ? email : '',
-    surveyConsent:  surveyOpt === 'yes' ? '是' : '否'
-  };
-
-  // 送出到 Google Apps Script
-  try {
-    await fetch(APPS_SCRIPT_URL, {
-      method: 'POST',
-      mode: 'no-cors', // Apps Script 需要 no-cors
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(payload)
-    });
-  } catch (err) {
-    console.error('送出資料失敗：', err);
-    // 即使送出失敗，仍讓老師看到完成頁面
-  }
+  // 最終送出存檔
+  await saveProgress('已送出');
 
   // 顯示完成頁
   document.getElementById('finalOutputDisplay').textContent = finalText;
