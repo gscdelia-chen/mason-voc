@@ -1,0 +1,1521 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>人社計畫效益撰寫小幫手</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Noto+Serif+TC:wght@300;400;600;700&family=Noto+Sans+TC:wght@300;400;500;600&display=swap');
+
+  :root {
+    --navy: #1a3a5c;
+    --blue: #2563a8;
+    --blue-light: #dbeafe;
+    --blue-mid: #93c5fd;
+    --teal: #0d6e6e;
+    --teal-light: #ccfbf1;
+    --amber: #92400e;
+    --amber-light: #fef3c7;
+    --slate: #475569;
+    --slate-light: #f1f5f9;
+    --white: #ffffff;
+    --border: #e2e8f0;
+    --shadow: 0 4px 24px rgba(26,58,92,0.10);
+    --radius: 12px;
+    --success: #059669;
+    --success-light: #d1fae5;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: 'Noto Sans TC', sans-serif;
+    background: #f8fafc;
+    color: #1e293b;
+    min-height: 100vh;
+  }
+
+  /* ── Header ── */
+  header {
+    background: linear-gradient(135deg, var(--navy) 0%, #1e4d7b 60%, var(--teal) 100%);
+    padding: 24px 40px;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    box-shadow: 0 2px 16px rgba(26,58,92,0.20);
+  }
+  .header-inner {
+    max-width: 860px;
+    margin: 0 auto;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 20px;
+  }
+  .logo-block h1 {
+    font-family: 'Noto Serif TC', serif;
+    font-size: 1.15rem;
+    font-weight: 700;
+    color: #fff;
+    letter-spacing: 0.04em;
+  }
+  .logo-block p {
+    font-size: 0.75rem;
+    color: rgba(255,255,255,0.65);
+    margin-top: 2px;
+  }
+  .header-badge {
+    background: rgba(255,255,255,0.15);
+    border: 1px solid rgba(255,255,255,0.25);
+    color: rgba(255,255,255,0.9);
+    padding: 4px 12px;
+    border-radius: 20px;
+    font-size: 0.72rem;
+    font-weight: 500;
+    white-space: nowrap;
+  }
+
+  /* ── Progress ── */
+  .progress-wrap {
+    background: var(--white);
+    border-bottom: 1px solid var(--border);
+    padding: 0 40px;
+  }
+  .progress-inner {
+    max-width: 860px;
+    margin: 0 auto;
+    display: flex;
+  }
+  .prog-step {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 12px 8px;
+    border-bottom: 3px solid transparent;
+    transition: all 0.3s;
+  }
+  .prog-step.active { border-bottom-color: var(--blue); }
+  .prog-step.done { border-bottom-color: var(--teal); }
+  .prog-num {
+    width: 24px; height: 24px;
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 0.72rem; font-weight: 700;
+    background: var(--border); color: var(--slate);
+    flex-shrink: 0;
+    transition: all 0.3s;
+  }
+  .prog-step.active .prog-num { background: var(--blue); color: #fff; }
+  .prog-step.done .prog-num { background: var(--teal); color: #fff; }
+  .prog-label { font-size: 0.75rem; color: var(--slate); font-weight: 500; line-height: 1.3; }
+  .prog-step.active .prog-label { color: var(--blue); font-weight: 600; }
+  .prog-step.done .prog-label { color: var(--teal); }
+
+  /* ── Main ── */
+  main {
+    max-width: 860px;
+    margin: 0 auto;
+    padding: 36px 40px 80px;
+  }
+
+  /* ── Section ── */
+  .section { display: none; }
+  .section.visible { display: block; animation: fadeIn 0.35s ease; }
+  @keyframes fadeIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+
+  .section-header { margin-bottom: 28px; }
+  .section-label {
+    font-size: 0.7rem;
+    font-weight: 700;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--blue);
+    margin-bottom: 6px;
+  }
+  .section-title {
+    font-family: 'Noto Serif TC', serif;
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: var(--navy);
+    line-height: 1.4;
+  }
+  .section-desc {
+    margin-top: 10px;
+    font-size: 0.9rem;
+    color: var(--slate);
+    line-height: 1.8;
+  }
+
+  /* ── Info box ── */
+  .info-box {
+    background: var(--blue-light);
+    border-left: 4px solid var(--blue);
+    border-radius: 0 8px 8px 0;
+    padding: 13px 16px;
+    margin-bottom: 20px;
+    font-size: 0.86rem;
+    color: var(--navy);
+    line-height: 1.7;
+  }
+
+  /* ── Form card ── */
+  .form-card {
+    background: var(--white);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 24px 28px;
+    margin-bottom: 20px;
+    box-shadow: var(--shadow);
+  }
+  .form-card:focus-within { border-color: var(--blue); box-shadow: 0 0 0 3px rgba(37,99,168,0.10); }
+
+  .field-label {
+    font-size: 0.88rem;
+    font-weight: 600;
+    color: var(--navy);
+    margin-bottom: 6px;
+    display: block;
+  }
+  .field-hint {
+    font-size: 0.8rem;
+    color: var(--slate);
+    margin-bottom: 12px;
+    line-height: 1.6;
+  }
+
+  input[type="text"], input[type="email"] {
+    width: 100%;
+    border: 1.5px solid var(--border);
+    border-radius: 8px;
+    padding: 10px 13px;
+    font-family: 'Noto Sans TC', sans-serif;
+    font-size: 0.92rem;
+    color: #1e293b;
+    background: #fafbfc;
+    outline: none;
+    transition: border-color 0.2s, box-shadow 0.2s;
+  }
+  input[type="text"]:focus, input[type="email"]:focus {
+    border-color: var(--blue);
+    box-shadow: 0 0 0 3px rgba(37,99,168,0.10);
+    background: #fff;
+  }
+  textarea {
+    width: 100%;
+    min-height: 120px;
+    border: 1.5px solid var(--border);
+    border-radius: 8px;
+    padding: 12px 14px;
+    font-family: 'Noto Sans TC', sans-serif;
+    font-size: 0.92rem;
+    line-height: 1.7;
+    color: #1e293b;
+    background: #fafbfc;
+    resize: vertical;
+    outline: none;
+    transition: border-color 0.2s, box-shadow 0.2s;
+  }
+  textarea:focus {
+    border-color: var(--blue);
+    box-shadow: 0 0 0 3px rgba(37,99,168,0.10);
+    background: #fff;
+  }
+  textarea::placeholder, input::placeholder { color: #b0bec5; }
+
+  /* ── 領域 tabs ── */
+  .domain-tabs {
+    display: flex;
+    gap: 6px;
+    margin-bottom: 16px;
+    flex-wrap: wrap;
+  }
+  .domain-tab {
+    padding: 6px 16px;
+    border-radius: 20px;
+    font-size: 0.8rem;
+    font-weight: 600;
+    cursor: pointer;
+    border: 1.5px solid var(--border);
+    background: #fafbfc;
+    color: var(--slate);
+    transition: all 0.2s;
+  }
+  .domain-tab:hover { border-color: var(--blue-mid); color: var(--navy); }
+  .domain-tab.active { background: var(--navy); border-color: var(--navy); color: #fff; }
+
+  /* ── 學門單選 ── */
+  .disc-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    gap: 8px;
+  }
+  .disc-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 10px 13px;
+    border: 1.5px solid var(--border);
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.2s;
+    background: #fafbfc;
+    user-select: none;
+  }
+  .disc-item:hover { border-color: var(--blue-mid); background: var(--blue-light); }
+  .disc-item.selected { border-color: var(--blue); background: var(--blue-light); }
+
+  /* radio circle - 預設空心，無勾 */
+  .disc-radio {
+    width: 17px; height: 17px;
+    border: 2px solid #cbd5e1;
+    border-radius: 50%;
+    flex-shrink: 0;
+    display: flex; align-items: center; justify-content: center;
+    transition: all 0.2s;
+  }
+  .disc-item.selected .disc-radio {
+    border-color: var(--blue);
+    background: var(--blue);
+  }
+  .disc-item.selected .disc-radio::after {
+    content: '';
+    width: 6px; height: 6px;
+    background: #fff;
+    border-radius: 50%;
+    display: block;
+  }
+  .disc-name { font-size: 0.83rem; color: #334155; line-height: 1.4; }
+  .disc-item.selected .disc-name { color: var(--navy); font-weight: 600; }
+  .disc-sub { font-size: 0.72rem; color: #94a3b8; line-height: 1.3; margin-top: 1px; }
+
+  .selected-disc-display {
+    margin-top: 12px;
+    font-size: 0.82rem;
+    color: var(--teal);
+    font-weight: 600;
+    min-height: 20px;
+  }
+
+  /* ── 研究類型 ── */
+  .type-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+    margin-top: 10px;
+  }
+  .type-card {
+    border: 1.5px solid var(--border);
+    border-radius: 10px;
+    padding: 14px 16px;
+    cursor: pointer;
+    transition: all 0.2s;
+    background: #fafbfc;
+  }
+  .type-card:hover { border-color: var(--blue-mid); background: var(--blue-light); }
+  .type-card.selected { border-color: var(--blue); background: var(--blue-light); }
+  .type-card-top {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    margin-bottom: 6px;
+  }
+  /* checkbox 預設空心方框，無勾 */
+  .type-check {
+    width: 17px; height: 17px;
+    border: 2px solid #cbd5e1;
+    border-radius: 4px;
+    flex-shrink: 0;
+    margin-top: 2px;
+    display: flex; align-items: center; justify-content: center;
+    transition: all 0.2s;
+    font-size: 0;
+  }
+  .type-card.selected .type-check {
+    background: var(--blue);
+    border-color: var(--blue);
+    font-size: 0.7rem;
+    color: #fff;
+  }
+  .type-card.selected .type-check::after {
+    content: '✓';
+    font-size: 0.72rem;
+    color: #fff;
+    line-height: 1;
+  }
+  .type-name {
+    font-size: 0.88rem;
+    font-weight: 700;
+    color: var(--navy);
+    line-height: 1.4;
+  }
+  .type-desc {
+    font-size: 0.78rem;
+    color: var(--slate);
+    line-height: 1.6;
+    margin-left: 27px;
+  }
+  .type-examples {
+    font-size: 0.8rem;
+    color: #334155;
+    margin-top: 8px;
+    margin-left: 27px;
+    line-height: 1.65;
+    border-left: 2px solid var(--blue-mid);
+    padding-left: 10px;
+    display: none;
+  }
+  .type-examples.show { display: block; }
+  .type-examples-label {
+    font-size: 0.7rem;
+    font-weight: 700;
+    color: var(--blue);
+    letter-spacing: 0.05em;
+    margin-bottom: 4px;
+  }
+
+  /* 研究類型提示 */
+  .type-emphasis-hint {
+    margin-top: 14px;
+    padding: 12px 14px;
+    background: var(--teal-light);
+    border-left: 3px solid var(--teal);
+    border-radius: 0 8px 8px 0;
+    font-size: 0.82rem;
+    color: #134e4a;
+    line-height: 1.65;
+    display: none;
+  }
+  .type-emphasis-hint.show { display: block; }
+
+  /* ── Buttons ── */
+  .btn-row {
+    display: flex;
+    gap: 12px;
+    justify-content: flex-end;
+    margin-top: 28px;
+    flex-wrap: wrap;
+  }
+  .btn {
+    padding: 10px 22px;
+    border-radius: 8px;
+    font-family: 'Noto Sans TC', sans-serif;
+    font-size: 0.9rem;
+    font-weight: 600;
+    cursor: pointer;
+    border: none;
+    transition: all 0.2s;
+    letter-spacing: 0.02em;
+  }
+  .btn:disabled { opacity: 0.5; cursor: not-allowed; }
+  .btn-primary { background: var(--blue); color: #fff; }
+  .btn-primary:hover:not(:disabled) { background: #1d4e8f; transform: translateY(-1px); box-shadow: 0 4px 12px rgba(37,99,168,0.3); }
+  .btn-secondary { background: var(--white); color: var(--slate); border: 1.5px solid var(--border); }
+  .btn-secondary:hover:not(:disabled) { border-color: var(--blue); color: var(--navy); }
+  .btn-teal { background: var(--teal); color: #fff; }
+  .btn-teal:hover:not(:disabled) { background: #0a5858; transform: translateY(-1px); }
+
+  /* ── Chat ── */
+  .chat-container {
+    background: var(--white);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    overflow: hidden;
+    box-shadow: var(--shadow);
+    margin-bottom: 20px;
+  }
+  .chat-header {
+    background: linear-gradient(90deg, var(--navy), #1e4d7b);
+    padding: 14px 20px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  .chat-avatar { width: 32px; height: 32px; background: rgba(255,255,255,0.2); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 1rem; }
+  .chat-title { color: #fff; font-size: 0.88rem; font-weight: 600; }
+  .chat-subtitle { color: rgba(255,255,255,0.65); font-size: 0.75rem; }
+
+  .chat-messages {
+    padding: 20px;
+    min-height: 180px;
+    max-height: 520px;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    background: #f8fafc;
+  }
+  .msg { display: flex; gap: 10px; max-width: 88%; animation: msgIn 0.3s ease; }
+  @keyframes msgIn { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: translateY(0); } }
+  .msg.ai { align-self: flex-start; }
+  .msg.user { align-self: flex-end; flex-direction: row-reverse; }
+  .msg-avatar { width: 30px; height: 30px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 0.82rem; flex-shrink: 0; margin-top: 2px; }
+  .msg.ai .msg-avatar { background: var(--navy); color: #fff; }
+  .msg.user .msg-avatar { background: var(--teal); color: #fff; }
+  .msg-bubble { padding: 12px 16px; border-radius: 12px; font-size: 0.88rem; line-height: 1.75; }
+  .msg.ai .msg-bubble { background: var(--white); border: 1px solid var(--border); color: #1e293b; border-top-left-radius: 4px; }
+  .msg.user .msg-bubble { background: var(--blue); color: #fff; border-top-right-radius: 4px; }
+
+  .typing-indicator { display: flex; align-items: center; gap: 5px; padding: 12px 16px; background: var(--white); border: 1px solid var(--border); border-radius: 12px; border-top-left-radius: 4px; width: fit-content; }
+  .typing-dot { width: 7px; height: 7px; background: var(--blue-mid); border-radius: 50%; animation: bounce 1.2s infinite; }
+  .typing-dot:nth-child(2) { animation-delay: 0.2s; }
+  .typing-dot:nth-child(3) { animation-delay: 0.4s; }
+  @keyframes bounce { 0%, 60%, 100% { transform: translateY(0); } 30% { transform: translateY(-6px); } }
+
+  .chat-input-area { border-top: 1px solid var(--border); padding: 14px 16px; background: var(--white); display: flex; gap: 10px; align-items: flex-end; }
+  .chat-input { flex: 1; min-height: 44px; max-height: 140px; border: 1.5px solid var(--border); border-radius: 8px; padding: 10px 13px; font-family: 'Noto Sans TC', sans-serif; font-size: 0.88rem; line-height: 1.6; resize: none; outline: none; transition: border-color 0.2s; overflow-y: auto; }
+  .chat-input:focus { border-color: var(--blue); }
+  .chat-send { padding: 10px 18px; background: var(--blue); color: #fff; border: none; border-radius: 8px; font-family: 'Noto Sans TC', sans-serif; font-size: 0.88rem; font-weight: 600; cursor: pointer; transition: all 0.2s; white-space: nowrap; flex-shrink: 0; }
+  .chat-send:hover:not(:disabled) { background: #1d4e8f; }
+  .chat-send:disabled { opacity: 0.5; cursor: not-allowed; }
+
+  /* ── Output ── */
+  .output-box { background: var(--white); border: 1.5px solid var(--teal); border-radius: var(--radius); padding: 24px 28px; margin-bottom: 20px; box-shadow: 0 4px 20px rgba(13,110,110,0.08); }
+  .output-label { font-size: 0.7rem; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase; color: var(--teal); margin-bottom: 12px; display: flex; align-items: center; gap: 6px; }
+  .output-label::before { content: ''; display: inline-block; width: 6px; height: 6px; background: var(--teal); border-radius: 50%; }
+  .output-content { font-size: 0.92rem; line-height: 1.85; color: #1e293b; white-space: pre-wrap; }
+
+  .edit-area { width: 100%; min-height: 200px; border: 1.5px solid var(--border); border-radius: 8px; padding: 14px 16px; font-family: 'Noto Sans TC', sans-serif; font-size: 0.92rem; line-height: 1.85; color: #1e293b; background: #fafbfc; resize: vertical; outline: none; transition: border-color 0.2s; display: none; }
+  .edit-area:focus { border-color: var(--blue); background: #fff; }
+  .edit-area.show { display: block; }
+  .edit-toggle { font-size: 0.8rem; color: var(--blue); cursor: pointer; text-decoration: underline; margin-top: 10px; display: inline-block; }
+
+  /* ── 完成送出 ── */
+  .finish-card { background: var(--white); border: 1px solid var(--border); border-radius: var(--radius); padding: 24px 28px; margin-bottom: 16px; box-shadow: var(--shadow); }
+  .finish-card h3 { font-family: 'Noto Serif TC', serif; font-size: 1rem; color: var(--navy); margin-bottom: 14px; }
+  .radio-group { display: flex; flex-direction: column; gap: 10px; }
+  .radio-item { display: flex; align-items: flex-start; gap: 10px; cursor: pointer; font-size: 0.88rem; color: #334155; line-height: 1.5; }
+  .radio-item input { margin-top: 2px; flex-shrink: 0; }
+  .email-input-wrap { display: none; margin-top: 12px; }
+  .email-input-wrap.show { display: block; }
+
+  /* ── 完成頁 ── */
+  .completion-banner { background: linear-gradient(135deg, var(--teal) 0%, #0a5858 100%); border-radius: var(--radius); padding: 32px 36px; text-align: center; color: #fff; margin-bottom: 24px; }
+  .completion-banner .check { font-size: 2.5rem; margin-bottom: 12px; }
+  .completion-banner h2 { font-family: 'Noto Serif TC', serif; font-size: 1.4rem; font-weight: 700; margin-bottom: 8px; }
+  .completion-banner p { font-size: 0.88rem; opacity: 0.85; line-height: 1.7; }
+
+  .word-count { font-size: 0.75rem; color: #94a3b8; text-align: right; margin-top: 4px; }
+  .error-msg { background: #fef2f2; border: 1px solid #fca5a5; border-radius: 8px; padding: 12px 16px; font-size: 0.85rem; color: #991b1b; margin-top: 10px; display: none; }
+  .error-msg.show { display: block; }
+
+  @media (max-width: 640px) {
+    header { padding: 18px 20px; }
+    .progress-wrap { padding: 0 16px; }
+    main { padding: 24px 20px 60px; }
+    .type-grid { grid-template-columns: 1fr; }
+    .disc-grid { grid-template-columns: 1fr 1fr; }
+    .btn-row { justify-content: stretch; }
+    .btn { flex: 1; text-align: center; }
+    .prog-label { display: none; }
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="header-inner">
+    <div class="logo-block">
+      <h1>人社計畫效益撰寫小幫手</h1>
+      <p>國家實驗研究院科技政策與資訊研究中心</p>
+    </div>
+    <div style="display:flex; flex-direction:column; align-items:flex-end; gap:4px; flex-shrink:0">
+      <span class="header-badge">Beta 試填版</span>
+      <span style="font-size:0.68rem; color:rgba(255,255,255,0.55); letter-spacing:0.04em">v3 ｜ 2026-05-26</span>
+    </div>
+  </div>
+</header>
+
+<div class="progress-wrap">
+  <div class="progress-inner">
+    <div class="prog-step active" id="prog1"><div class="prog-num">1</div><div class="prog-label">基本資料</div></div>
+    <div class="prog-step" id="prog2"><div class="prog-num">2</div><div class="prog-label">計畫摘要</div></div>
+    <div class="prog-step" id="prog3"><div class="prog-num">3</div><div class="prog-label">AI 引導對話</div></div>
+    <div class="prog-step" id="prog4"><div class="prog-num">4</div><div class="prog-label">效益文字</div></div>
+    <div class="prog-step" id="prog5"><div class="prog-num">5</div><div class="prog-label">完成送出</div></div>
+  </div>
+</div>
+
+<main>
+
+<!-- ══ STEP 1 ══ -->
+<div class="section visible" id="step1">
+  <div class="section-header">
+    <div class="section-label">步驟一 / 五</div>
+    <h2 class="section-title">基本資料</h2>
+    <p class="section-desc">請填寫計畫名稱，並選擇所屬學門與研究類型，協助系統提供更適切的引導。</p>
+  </div>
+
+  <!-- 計畫名稱 -->
+  <div class="form-card">
+    <label class="field-label" for="planName">計畫名稱 <span style="color:#e53e3e">*</span></label>
+    <input type="text" id="planName" placeholder="請輸入計畫完整名稱" oninput="checkStep1()">
+  </div>
+
+  <!-- 學門 -->
+  <div class="form-card">
+    <label class="field-label">研究學門 <span style="color:#e53e3e">*</span></label>
+    <p class="field-hint">請選擇最符合的學門（單選）</p>
+
+    <div class="domain-tabs" id="domainTabs">
+      <div class="domain-tab active" onclick="switchDomain('人文')">人文</div>
+      <div class="domain-tab" onclick="switchDomain('社會')">社會</div>
+      <div class="domain-tab" onclick="switchDomain('管理')">管理</div>
+      <div class="domain-tab" onclick="switchDomain('科教')">科教</div>
+      <div class="domain-tab" onclick="switchDomain('其他')">其他</div>
+    </div>
+
+    <div class="disc-grid" id="discGrid"></div>
+    <div class="selected-disc-display" id="selectedDiscDisplay">尚未選擇學門</div>
+  </div>
+
+  <!-- 研究類型 -->
+  <div class="form-card">
+    <label class="field-label">研究類型 <span style="color:#e53e3e">*</span></label>
+    <p class="field-hint">請選擇最符合的研究類型（可複選）。選擇學門後，下方將自動顯示各類型的研究範例供參考。</p>
+
+    <div class="type-grid" id="typeGrid">
+      <div class="type-card" onclick="toggleType(this,'A')">
+        <div class="type-card-top">
+          <div class="type-check"></div>
+          <div class="type-name">A｜純基礎研究</div>
+        </div>
+        <div class="type-desc">以增進對現象的理解、提出新理論或概念為主，不直接考慮應用</div>
+        <div class="type-examples" id="ex-A">
+          <div class="type-examples-label">研究範例</div>
+          <div class="type-examples-content"></div>
+        </div>
+      </div>
+      <div class="type-card" onclick="toggleType(this,'B')">
+        <div class="type-card-top">
+          <div class="type-check"></div>
+          <div class="type-name">B｜應用導向基礎研究</div>
+        </div>
+        <div class="type-desc">既追求基礎理解，也考慮實際應用價值</div>
+        <div class="type-examples" id="ex-B">
+          <div class="type-examples-label">研究範例</div>
+          <div class="type-examples-content"></div>
+        </div>
+      </div>
+      <div class="type-card" onclick="toggleType(this,'C')">
+        <div class="type-card-top">
+          <div class="type-check"></div>
+          <div class="type-name">C｜純應用研究</div>
+        </div>
+        <div class="type-desc">以解決特定實務問題為主要目標</div>
+        <div class="type-examples" id="ex-C">
+          <div class="type-examples-label">研究範例</div>
+          <div class="type-examples-content"></div>
+        </div>
+      </div>
+      <div class="type-card" onclick="toggleType(this,'D')">
+        <div class="type-card-top">
+          <div class="type-check"></div>
+          <div class="type-name">D｜基礎建設型研究</div>
+        </div>
+        <div class="type-desc">系統性建立知識基礎，讓後續研究得以在此基礎上進行</div>
+        <div class="type-examples" id="ex-D">
+          <div class="type-examples-label">研究範例</div>
+          <div class="type-examples-content"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 效益構面提醒 -->
+    <div class="type-emphasis-hint" id="typeHint"></div>
+  </div>
+
+  <div class="btn-row">
+    <button class="btn btn-primary" id="step1Btn" onclick="goStep(2)" disabled>下一步 →</button>
+  </div>
+</div>
+
+<!-- ══ STEP 2 ══ -->
+<div class="section" id="step2">
+  <div class="section-header">
+    <div class="section-label">步驟二 / 五</div>
+    <h2 class="section-title">計畫摘要與成果資料</h2>
+    <p class="section-desc">請貼上或填寫計畫摘要。如有補充資料（獲獎、媒體報導、合作機構、學術產出等），也可一併填入，有助於 AI 產出更完整的效益文字。</p>
+  </div>
+
+  <div class="form-card">
+    <label class="field-label" for="abstract">計畫摘要 <span style="color:#e53e3e">*</span></label>
+    <p class="field-hint">可直接貼上計畫書摘要、結案摘要，或用自己的話描述研究內容與成果。</p>
+    <textarea id="abstract" placeholder="請貼上或填寫計畫摘要……" oninput="updateWordCount('abstract','abstractCount'); checkStep2()" style="min-height:160px"></textarea>
+    <div class="word-count" id="abstractCount">0 字</div>
+  </div>
+
+  <div class="form-card">
+    <label class="field-label" for="supplement">補充資料（選填）</label>
+    <p class="field-hint">如有獲獎紀錄、媒體報導、政策影響、合作機構、學術發表等補充資訊，可填寫於此。</p>
+    <textarea id="supplement" placeholder="例如：本計畫共發表 2 篇 TSSCI 論文、獲得 2023 年 USR 楷模獎、與 XX 博物館合作策展……" oninput="updateWordCount('supplement','supplementCount')" style="min-height:100px"></textarea>
+    <div class="word-count" id="supplementCount">0 字</div>
+  </div>
+
+  <div class="btn-row">
+    <button class="btn btn-secondary" onclick="goStep(1)">← 返回</button>
+    <button class="btn btn-primary" id="step2Btn" onclick="startAIConversation()" disabled>送出，開始 AI 引導 →</button>
+  </div>
+</div>
+
+<!-- ══ STEP 3 ══ -->
+<div class="section" id="step3">
+  <div class="section-header">
+    <div class="section-label">步驟三 / 五</div>
+    <h2 class="section-title">AI 引導對話</h2>
+    <p class="section-desc">AI 正在分析您的計畫資料，判斷是否需要補充說明。請依提示回答，完成後將產出效益文字草稿。</p>
+  </div>
+
+  <div class="chat-container">
+    <div class="chat-header">
+      <div class="chat-avatar">🤖</div>
+      <div>
+        <div class="chat-title">效益撰寫小幫手</div>
+        <div class="chat-subtitle">正在分析您的計畫資料……</div>
+      </div>
+    </div>
+    <div class="chat-messages" id="chatMessages"></div>
+    <div class="chat-input-area" id="chatInputArea" style="display:none">
+      <textarea class="chat-input" id="chatInput" placeholder="請在此輸入您的回答……" rows="2"
+        onkeydown="if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();sendUserMessage()}"
+        oninput="autoResizeTextarea(this)"></textarea>
+      <button class="chat-send" id="chatSendBtn" onclick="sendUserMessage()">送出</button>
+    </div>
+  </div>
+  <div class="error-msg" id="chatError">AI 服務暫時無法連線，請稍後再試。</div>
+  <div class="btn-row">
+    <button class="btn btn-secondary" onclick="goStep(2)">← 返回修改摘要</button>
+  </div>
+</div>
+
+<!-- ══ STEP 4 ══ -->
+<div class="section" id="step4">
+  <div class="section-header">
+    <div class="section-label">步驟四 / 五</div>
+    <h2 class="section-title">效益文字</h2>
+    <p class="section-desc">以下是 AI 根據您的資料產出的效益文字。您可以直接使用，或點選「編輯修改」進行調整。系統將同時保留 AI 原始版本與您的修改版本。</p>
+  </div>
+
+  <div class="output-box">
+    <div class="output-label">AI 產出版本</div>
+    <div class="output-content" id="aiOutputContent">（效益文字將顯示於此）</div>
+  </div>
+
+  <div class="form-card">
+    <div class="field-label">您的版本</div>
+    <p class="field-hint">如需修改，請直接在下方編輯。</p>
+    <div class="edit-toggle" id="editToggleBtn" onclick="toggleEdit()">✏️ 點此編輯修改</div>
+    <textarea class="edit-area" id="editContent" oninput="updateWordCount('editContent','editCount')"></textarea>
+    <div class="word-count" id="editCount" style="display:none"></div>
+  </div>
+
+  <div class="btn-row">
+    <button class="btn btn-secondary" onclick="goStep(3)">← 返回對話</button>
+    <button class="btn btn-teal" onclick="copyOutput()">📋 複製效益文字</button>
+    <button class="btn btn-primary" onclick="goStep(5)">下一步 →</button>
+  </div>
+</div>
+
+<!-- ══ STEP 5 ══ -->
+<div class="section" id="step5">
+  <div class="section-header">
+    <div class="section-label">步驟五 / 五</div>
+    <h2 class="section-title">完成送出</h2>
+    <p class="section-desc">請選擇是否需要將填答內容回寄給自己，以及是否願意參與研究回饋問卷。</p>
+  </div>
+
+  <div class="finish-card">
+    <h3>📧 是否將填答內容寄給自己？</h3>
+    <div class="radio-group">
+      <label class="radio-item">
+        <input type="radio" name="emailOpt" value="yes" onchange="toggleEmailInput(true)">
+        <span>是，請將效益文字（AI版本 ＋ 我的修改版本）與所有填答紀錄寄給我</span>
+      </label>
+      <label class="radio-item">
+        <input type="radio" name="emailOpt" value="no" onchange="toggleEmailInput(false)" checked>
+        <span>否，不需要</span>
+      </label>
+    </div>
+    <div class="email-input-wrap" id="emailWrap">
+      <label class="field-label" style="font-size:0.82rem; margin-top:4px">您的 Email：</label>
+      <input type="email" id="userEmail" placeholder="請輸入您的 Email">
+    </div>
+  </div>
+
+  <div class="finish-card">
+    <h3>📝 是否願意參與問卷回饋？</h3>
+    <p style="font-size:0.85rem; color:var(--slate); margin-bottom:14px; line-height:1.7">本系統目前處於研究蒐集資料階段，您的回饋將協助我們改善工具設計。問卷約需 3-5 分鐘。</p>
+    <div class="radio-group">
+      <label class="radio-item">
+        <input type="radio" name="surveyOpt" value="yes">
+        <span>是，願意參與問卷回饋</span>
+      </label>
+      <label class="radio-item">
+        <input type="radio" name="surveyOpt" value="no" checked>
+        <span>否，不參與</span>
+      </label>
+    </div>
+  </div>
+
+  <div class="btn-row">
+    <button class="btn btn-secondary" onclick="goStep(4)">← 返回修改</button>
+    <button class="btn btn-primary" onclick="submitAll()">完成送出 ✓</button>
+  </div>
+</div>
+
+<!-- ══ STEP 6 完成頁 ══ -->
+<div class="section" id="step6">
+  <div class="completion-banner">
+    <div class="check">✦</div>
+    <h2>感謝您的參與</h2>
+    <p>您的填答已成功送出。<br>如您選擇回寄，效益文字與填答紀錄將寄送至您的信箱。</p>
+  </div>
+
+  <div class="finish-card" id="surveyLinkCard" style="display:none">
+    <h3>📝 問卷連結</h3>
+    <p style="font-size:0.86rem; color:var(--slate); line-height:1.7; margin-bottom:16px">感謝您願意提供回饋！請點選下方連結填寫問卷，約需 3-5 分鐘。</p>
+    <a href="SURVEY_LINK_HERE" target="_blank" class="btn btn-teal" style="display:inline-block; text-decoration:none">前往填寫問卷 →</a>
+  </div>
+
+  <div class="output-box" style="margin-top:20px">
+    <div class="output-label">您的效益文字（可再次複製）</div>
+    <div class="output-content" id="finalOutputDisplay"></div>
+  </div>
+  <div class="btn-row">
+    <button class="btn btn-teal" onclick="copyFinalOutput()">📋 複製效益文字</button>
+  </div>
+</div>
+
+</main>
+
+<script>
+// ══════════════════════════════════════════
+// 學門資料
+// ══════════════════════════════════════════
+const DOMAINS = {
+  '人文': [
+    { id: '文學一', name: '文學一', sub: '中國文學、台灣文學、原住民文學等' },
+    { id: '文學二', name: '文學二', sub: '外國文學' },
+    { id: '語言學', name: '語言學', sub: '' },
+    { id: '哲學', name: '哲學', sub: '' },
+    { id: '歷史學', name: '歷史學', sub: '' },
+    { id: '藝術學', name: '藝術學', sub: '' },
+  ],
+  '社會': [
+    { id: '社會學及社福社工', name: '社會學及社福社工', sub: '含傳播學' },
+    { id: '人類學及族群研究', name: '人類學及族群研究', sub: '含客家研究、原住民研究' },
+    { id: '心理學', name: '心理學', sub: '' },
+    { id: '教育學', name: '教育學', sub: '含體育學及圖書資訊學' },
+    { id: '法律學', name: '法律學', sub: '' },
+    { id: '政治學', name: '政治學', sub: '' },
+    { id: '經濟學', name: '經濟學', sub: '' },
+  ],
+  '管理': [
+    { id: '管理學一', name: '管理學一', sub: '' },
+    { id: '管理學二', name: '管理學二', sub: '' },
+    { id: '財金及會計', name: '財金及會計', sub: '' },
+    { id: '區域研究', name: '區域研究', sub: '' },
+  ],
+  '科教': [
+    { id: '科教研究', name: '科教研究', sub: '含數學教育、科學教育、資訊教育、應用科學教育、醫學教育、科技社會與傳播、科學教育實作' },
+  ],
+  '其他': [
+    { id: '其他', name: '其他', sub: '含新興、跨域' },
+  ]
+};
+
+// 各學門 × 各研究類型的範例句（取自MD檔案，各取2-3句）
+const DISC_EXAMPLES = {
+  '文學一': {
+    A: '探討唐代詩學中「興」的美學概念與其詮釋傳統；分析台灣原住民神話的敘事結構與宇宙觀',
+    B: '研究客家文學的語言特色，同時發展客語文學教材框架；探討台灣文學的後殖民書寫，並提供文化政策參考',
+    C: '為中學語文教育設計原住民文學選讀課程與教案；協助文化機構進行古籍善本的展示詮釋與推廣',
+    D: '系統整理清代台灣古典詩文總集，建立可查詢的文獻資料庫；建置金石簡牘出土文字資料庫'
+  },
+  '文學二': {
+    A: '分析二十世紀英國現代主義小說的時間敘事策略；探討日本物語文學中女性書寫的歷史脈絡',
+    B: '研究後殖民文學理論在台灣文化場域的適用性與修正；探討離散文學的認同建構，應用於移民教育政策討論',
+    C: '為大學外文系設計當代美國文學通識課程模組；進行重要外國文學作品的中譯與學術注釋',
+    D: '系統整理各語種外國文學重要理論著作的中譯書目；建立台灣翻譯文學書目資料庫'
+  },
+  '語言學': {
+    A: '探討台灣南島語言的格位系統與論元結構；研究臺灣手語的句法與語意結構',
+    B: '研究第二語言學習中的句法遷移現象，並提出教學啟示；探討社會語言學中的語言接觸與混碼現象，應用於雙語政策設計',
+    C: '設計原住民族語言復振的社區教學方案；開發英語口說評量自動化工具',
+    D: '建置台灣各族原住民族語語料庫，完整記錄語音、詞彙與句法；建置計算語言學與語料庫語言學所需的多語平行語料資源'
+  },
+  '哲學': {
+    A: '探討孟子心性論的當代詮釋可能性；分析維根斯坦後期語言哲學的私有語言論證',
+    B: '研究儒家倫理學在醫療決策情境中的應用框架；探討科技哲學的倫理基礎，回應AI治理議題',
+    C: '為政府部門設計AI倫理審查指引；發展醫療倫理諮詢的實務操作手冊',
+    D: '系統整理並翻譯重要西方哲學原典；建置台灣哲學文獻目錄資料庫'
+  },
+  '歷史學': {
+    A: '重新詮釋清代台灣移民社會的族群衝突結構；探討明代海洋貿易網絡的形成機制',
+    B: '研究日治時期台灣農業政策的歷史脈絡，以回應當代農地議題；分析戰後台灣政治轉型的歷史過程，提供轉型正義政策參考',
+    C: '協助地方政府撰寫縣市志與鄉鎮史；為博物館策畫歷史主題展覽並撰寫展示說明文本',
+    D: '系統整理並數位化日治時期台灣總督府公文書；建置清代台灣地方志全文資料庫'
+  },
+  '藝術學': {
+    A: '探討台灣現代美術發展與日本殖民美學的關係；分析傳統布袋戲的表演美學與敘事結構',
+    B: '研究當代藝術的社會參與實踐，探討其對社區認同的影響；分析文化創意產業政策對藝術生態的影響',
+    C: '協助博物館進行典藏品數位修復；為文化局設計地方藝文政策評估框架',
+    D: '數位化並建置台灣美術史圖像資料庫；系統整理台灣傳統工藝技術文獻與影音紀錄'
+  },
+  '社會學及社福社工': {
+    A: '探討台灣社會階層流動的結構性因素；探討社群媒體上政治極化的形成機制',
+    B: '研究長照服務的可近性與不平等問題，提供政策建議；探討假新聞擴散的社會心理機制，提供平台治理建議',
+    C: '為社福機構設計服務使用者的需求評估工具；開發中學媒體識讀課程教材',
+    D: '建置台灣社會變遷長期調查資料庫；建置台灣新聞媒體歷史文獻資料庫'
+  },
+  '人類學及族群研究': {
+    A: '探討台灣原住民祭儀的宇宙觀與社會再生產機制；分析客家認同的歷史形構與邊界維持',
+    B: '研究都市原住民的文化適應過程，提供社會服務設計參考；研究語言瀕危與語言復振的社會文化機制，應用於族語政策設計',
+    C: '為原住民族委員會進行族群政策評估；協助地方部落設計文化傳承計畫',
+    D: '系統記錄瀕危原住民族祭典與口傳知識；數位化博物館館藏民族誌文物資料'
+  },
+  '心理學': {
+    A: '探討工作記憶容量對語言理解的影響機制；研究情緒調節策略的神經生理基礎',
+    B: '研究正念介入對焦慮症的療效，並發展本土化治療方案；探討高齡者認知退化的心理保護因子，應用於社區心理健康促進',
+    C: '開發適用於台灣高中生的心理健康篩檢工具；設計職場心理健康促進方案並評估成效',
+    D: '建立台灣心理健康全國性調查資料庫；建置台灣兒童與青少年認知發展長期追蹤資料庫'
+  },
+  '教育學': {
+    A: '探討學習動機的自我決定理論在台灣文化脈絡中的適用性；探討使用者資訊搜尋行為的認知模型',
+    B: '研究差異化教學的理論基礎與課堂實踐效果；研究公共圖書館服務設計對閱讀行為的促進效果',
+    C: '設計並評估偏鄉小校的混齡教學方案；為國家圖書館設計館藏數位化優先排序評估工具',
+    D: '建置台灣教育長期追蹤資料庫；建置台灣學生體適能與運動參與長期追蹤資料庫'
+  },
+  '法律學': {
+    A: '探討憲法解釋方法論的理論基礎；研究民事法中契約自由原則的理論界限',
+    B: '研究數位平台的資料治理法律框架，提出立法建議；研究勞動及社會法對非典型就業的規範適用，提供修法建議',
+    C: '協助立法院研究室撰寫法案評估報告；為企業提供個人資料保護的法律遵循方案',
+    D: '系統整理台灣司法判決資料庫並建立索引；建置台灣立法史料與法規演變歷程資料庫'
+  },
+  '政治學': {
+    A: '探討台灣民主鞏固的制度性因素；分析威權體制崩解的比較政治理論',
+    B: '研究選舉制度設計對政黨體系的影響，提供修憲參考；探討兩岸關係的政治經濟結構，提供外交政策分析',
+    C: '為政府機關進行公共政策評估；協助地方政府設計公民參與機制',
+    D: '建置台灣歷屆選舉資料庫；建置東亞各國政府施政與政策文件的比較研究資料庫'
+  },
+  '經濟學': {
+    A: '探討勞動市場中資訊不對稱的理論模型；研究長期經濟成長與技術創新的關係',
+    B: '研究最低工資政策對就業的影響，提供政策建議；研究金融科技發展對金融市場穩定性的影響，提供監理建議',
+    C: '為政府機關進行財政收支影響評估；評估特定產業政策的成本效益',
+    D: '建置台灣家庭收支長期調查資料庫；整理並數位化日治時期台灣產業統計文獻'
+  },
+  '管理學一': {
+    A: '探討組織學習與知識創造的理論機制；研究策略管理中動態能力理論的解釋邊界',
+    B: '研究遠距工作對組織溝通與團隊凝聚力的影響，提供人力資源管理建議；探討醫院組織文化與醫療安全的關聯',
+    C: '協助中小企業進行數位轉型規劃；協助醫療機構進行醫務流程優化',
+    D: '建置台灣企業創新調查長期資料庫；系統整理台灣產業政策歷史文件'
+  },
+  '管理學二': {
+    A: '探討消費者品牌依戀的心理機制；探討開放式創新的知識流動機制',
+    B: '研究社群媒體行銷對消費者購買意圖的影響；研究人工智慧導入對供應鏈決策的影響',
+    C: '為地方特色產業設計品牌行銷策略；協助傳統產業規劃資訊系統升級方案',
+    D: '建置台灣消費者行為長期追蹤調查資料庫；系統整理企業數位轉型案例文件庫'
+  },
+  '財金及會計': {
+    A: '探討資本市場中投資人行為偏誤的理論模型；研究企業財務報表品質的信號傳遞機制',
+    B: '研究ESG投資策略對企業長期績效的影響；探討金融科技對普惠金融的影響，提供監理建議',
+    C: '協助金融監理機關設計風險預警指標；開發中小企業財務健診工具',
+    D: '建置台灣上市公司財務資料長期追蹤資料庫；整理並標準化台灣企業ESG揭露資料'
+  },
+  '區域研究': {
+    A: '探討東南亞政治伊斯蘭化的歷史地理脈絡；研究人文地理學中地方感與認同建構的理論',
+    B: '研究新南向政策下台商投資行為的區域政治經濟邏輯；探討都市更新政策對社區社會網絡的影響',
+    C: '為地方政府進行城鄉發展規劃評估；協助縣市政府進行地籍資料整合與地政資訊系統建置',
+    D: '建置台灣歷史地圖數位化資料庫；建置台灣地籍與土地使用變遷長期資料庫'
+  },
+  '科教研究': {
+    A: '探討科學概念學習中迷思概念的形成機制；研究數學教育中學生數學推理與證明能力的發展歷程',
+    B: '研究探究式教學對科學推理能力的影響；研究數學焦慮的成因與介入效果，提供數學教育政策建議',
+    C: '開發中學STEM整合課程模組並進行現場試驗；為科學博物館設計互動展示的教育評量工具',
+    D: '建置台灣科學教育長期追蹤資料庫；建置台灣數學教育研究文獻資料庫'
+  },
+  '其他': {
+    A: '探討數位人文方法論的認識論基礎；分析跨學科研究的知識整合機制',
+    B: '研究人工智慧倫理的跨學科理論框架，應用於政策設計；探討永續發展目標（SDGs）在人社研究中的整合路徑',
+    C: '協助政府機關進行跨部會政策整合評估；開發公民科學平台的參與設計方案',
+    D: '建置跨學門人文社科研究資料共享平台；系統整理台灣社會科學開放資料資源目錄'
+  }
+};
+
+// 研究類型 → 效益構面提醒
+const TYPE_HINTS = {
+  A: '🔬 <strong>純基礎研究</strong>的效益重點在於<strong>學術貢獻</strong>：理論創新、學術影響力、研究典範的建立或挑戰。撰寫時請特別說明這個研究在學術上「改變了什麼」或「打開了什麼新的可能性」。',
+  B: '⚖️ <strong>應用導向基礎研究</strong>的效益需兼顧<strong>學術深度與社會連結</strong>：一方面說明理論或方法上的貢獻，另一方面說明研究如何回應實際問題或政策需求。',
+  C: '🌐 <strong>純應用研究</strong>的效益重點在於<strong>實務影響與社會連結</strong>：具體說明解決了什麼問題、幫助了哪些人或機構、促成了什麼改變，並說明是否有跨域合作。',
+  D: '🏛️ <strong>基礎建設型研究</strong>的效益核心在於<strong>學術公共財的貢獻</strong>：說明這些資料、語料庫、史料庫讓誰可以做什麼原本做不到的研究，以及目前已有哪些人或機構在使用。',
+  AB: '⚖️ 您同時選擇了<strong>基礎研究</strong>與<strong>應用導向</strong>，撰寫時請兼顧學術貢獻與社會連結兩個面向。',
+  multi: '📌 您選擇了多種研究類型，撰寫時可依各類型的核心貢獻分別說明，也可整合呈現研究的多元影響。'
+};
+
+// ══════════════════════════════════════════
+// 狀態變數
+// ══════════════════════════════════════════
+let selectedDisc = '';
+let selectedTypes = [];
+let currentDomain = '人文';
+let conversationHistory = [];
+let aiFinalText = '';
+let aiDraftText = '';
+let isWaiting = false;
+
+// 追蹤各階段問答內容（供存入 Google Sheet 使用）
+let trackAiFollowUpQ   = '';  // AI 缺口追問題目
+let trackUserFollowUpA = '';  // 老師對追問的回答
+let trackAiEvalQ       = '';  // AI 草稿評估問題
+let trackUserEvalA     = '';  // 老師對評估問題的回答
+
+const API_KEY         = 'AIzaSyA5nq4t17h6XYHfNrlQnXDbEdE0aJiPbxY'; // 換成你的 Gemini API Key
+const GEMINI_MODEL    = 'gemini-flash-latest';       // 可換成 gemini-1.5-pro
+const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxAWhFSZGDLBGJVuaC_ptNqA5QV31Y3aIUlEzjOmaU3pqUQKArdG-1mHCxNybxXrlPp/exec'; // 換成部署後的 Apps Script 網址
+
+// 產生 Session ID（每次開啟頁面自動產生，識別同一次填答）
+const SESSION_ID = 'sess_' + Date.now() + '_' + Math.random().toString(36).substring(2, 7);
+
+// ── 分階段存檔到 Google Sheet ──
+async function saveProgress(status) {
+  if (!APPS_SCRIPT_URL || APPS_SCRIPT_URL === 'YOUR_APPS_SCRIPT_URL_HERE') return;
+
+  // 整理學門全名
+  let discFullName = selectedDisc;
+  for (const d of Object.values(DOMAINS)) {
+    const found = d.find(x => x.id === selectedDisc);
+    if (found) { discFullName = found.sub ? `${found.name}（${found.sub}）` : found.name; break; }
+  }
+
+  // 整理研究類型
+  const typeLabel = selectedTypes.map(t => ({
+    A:'純基礎研究', B:'應用導向基礎研究', C:'純應用研究', D:'基礎建設型研究'
+  }[t])).join('、');
+
+  const payload = {
+    sessionId:      SESSION_ID,
+    status:         status,
+    planName:       document.getElementById('planName')?.value.trim() || '',
+    discipline:     discFullName,
+    researchTypes:  typeLabel,
+    abstract:       document.getElementById('abstract')?.value.trim() || '',
+    supplement:     document.getElementById('supplement')?.value.trim() || '',
+    aiFollowUpQ:    trackAiFollowUpQ,
+    userFollowUpA:  trackUserFollowUpA,
+    aiDraftText:    aiDraftText,
+    aiEvalQ:        trackAiEvalQ,
+    userEvalA:      trackUserEvalA,
+    aiFinalText:    aiFinalText,
+    userEditedText: document.getElementById('editContent')?.value.trim() || '',
+    email:          document.getElementById('userEmail')?.value.trim() || '',
+    surveyConsent:  document.querySelector('input[name="surveyOpt"]:checked')?.value === 'yes' ? '是' : ''
+  };
+
+  try {
+    const res = await fetch(APPS_SCRIPT_URL, {
+      method: 'POST',
+      mode: 'no-cors',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload)
+    });
+    console.log('saveProgress 送出成功：', status);
+  } catch (err) {
+    console.error('saveProgress 失敗：', err);
+  }
+}
+
+// ══════════════════════════════════════════
+// 初始化
+// ══════════════════════════════════════════
+window.onload = () => switchDomain('人文');
+
+// ══════════════════════════════════════════
+// 學門切換
+// ══════════════════════════════════════════
+function switchDomain(domain) {
+  currentDomain = domain;
+  // 更新 tab 樣式
+  document.querySelectorAll('.domain-tab').forEach(t => {
+    t.classList.toggle('active', t.textContent === domain);
+  });
+  // 渲染學門
+  const grid = document.getElementById('discGrid');
+  const discs = DOMAINS[domain] || [];
+  grid.innerHTML = discs.map(d => `
+    <div class="disc-item ${selectedDisc === d.id ? 'selected' : ''}" onclick="selectDisc('${d.id}')">
+      <div class="disc-radio"></div>
+      <div>
+        <div class="disc-name">${d.name}</div>
+        ${d.sub ? `<div class="disc-sub">${d.sub}</div>` : ''}
+      </div>
+    </div>
+  `).join('');
+}
+
+function selectDisc(id) {
+  selectedDisc = id;
+  // 更新所有 disc-item 樣式（含跨 domain）
+  document.querySelectorAll('.disc-item').forEach(el => {
+    const name = el.querySelector('.disc-name').textContent;
+    el.classList.toggle('selected', name === id || el.querySelector('.disc-name').textContent === id);
+  });
+  // 找學門顯示名稱
+  let dispName = id;
+  for (const d of Object.values(DOMAINS)) {
+    const found = d.find(x => x.id === id);
+    if (found) { dispName = found.sub ? `${found.name}（${found.sub}）` : found.name; break; }
+  }
+  document.getElementById('selectedDiscDisplay').textContent = '✓ 已選擇：' + dispName;
+  // 更新範例句
+  updateTypeExamples();
+  checkStep1();
+}
+
+// ══════════════════════════════════════════
+// 研究類型
+// ══════════════════════════════════════════
+function toggleType(el, type) {
+  el.classList.toggle('selected');
+  if (el.classList.contains('selected')) {
+    if (!selectedTypes.includes(type)) selectedTypes.push(type);
+  } else {
+    selectedTypes = selectedTypes.filter(t => t !== type);
+  }
+  updateTypeExamples();
+  updateTypeHint();
+  checkStep1();
+}
+
+function updateTypeExamples() {
+  if (!selectedDisc) return;
+  const examples = DISC_EXAMPLES[selectedDisc] || {};
+  ['A','B','C','D'].forEach(type => {
+    const box = document.getElementById('ex-' + type);
+    if (!box) return;
+    if (examples[type]) {
+      box.querySelector('.type-examples-content').textContent = examples[type];
+      box.classList.add('show');
+    } else {
+      box.classList.remove('show');
+    }
+  });
+}
+
+function updateTypeHint() {
+  const hint = document.getElementById('typeHint');
+  if (selectedTypes.length === 0) {
+    hint.classList.remove('show');
+    return;
+  }
+  let msg = '';
+  if (selectedTypes.length >= 3) {
+    msg = TYPE_HINTS.multi;
+  } else if (selectedTypes.includes('A') && selectedTypes.includes('B')) {
+    msg = TYPE_HINTS.AB;
+  } else if (selectedTypes.length > 1) {
+    msg = TYPE_HINTS.multi;
+  } else {
+    msg = TYPE_HINTS[selectedTypes[0]] || '';
+  }
+  hint.innerHTML = msg;
+  hint.classList.toggle('show', !!msg);
+}
+
+// ══════════════════════════════════════════
+// 驗證
+// ══════════════════════════════════════════
+function checkStep1() {
+  const name = document.getElementById('planName').value.trim();
+  document.getElementById('step1Btn').disabled = !(name && selectedDisc && selectedTypes.length > 0);
+}
+
+function checkStep2() {
+  const abs = document.getElementById('abstract').value.trim();
+  document.getElementById('step2Btn').disabled = abs.length < 20;
+}
+
+// ══════════════════════════════════════════
+// 步驟切換
+// ══════════════════════════════════════════
+function goStep(n) {
+  document.querySelectorAll('.section').forEach(s => s.classList.remove('visible'));
+  document.querySelectorAll('.prog-step').forEach((p, i) => {
+    p.classList.remove('active','done');
+    if (i + 1 < n) p.classList.add('done');
+    if (i + 1 === n) p.classList.add('active');
+  });
+  const t = document.getElementById('step' + n);
+  if (t) t.classList.add('visible');
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+
+  // 各步驟切換時存檔
+  const statusMap = { 2: 'Step1完成', 3: 'Step2完成', 4: 'Step3完成', 5: 'Step4完成' };
+  if (statusMap[n]) saveProgress(statusMap[n]);
+}
+
+// ══════════════════════════════════════════
+// AI 對話
+// ══════════════════════════════════════════
+async function startAIConversation() {
+  goStep(3);
+  const planName = document.getElementById('planName').value.trim();
+  const abstract = document.getElementById('abstract').value.trim();
+  const supplement = document.getElementById('supplement').value.trim();
+
+  // 找學門全名
+  let discFullName = selectedDisc;
+  for (const d of Object.values(DOMAINS)) {
+    const found = d.find(x => x.id === selectedDisc);
+    if (found) { discFullName = found.sub ? `${found.name}（${found.sub}）` : found.name; break; }
+  }
+  const typeLabel = selectedTypes.map(t => ({'A':'純基礎研究','B':'應用導向基礎研究','C':'純應用研究','D':'基礎建設型研究'}[t])).join('、');
+
+  const userContent = `計畫名稱：${planName}
+研究學門：${discFullName}
+研究類型：${typeLabel}
+
+計畫摘要：
+${abstract}
+${supplement ? '\n補充資料：\n' + supplement : ''}`.trim();
+
+  conversationHistory = [];
+  showTyping();
+
+  const response = await callAI(getSystemPrompt(), userContent);
+  hideTyping();
+
+  if (response) {
+    addAIMessage(response);
+    conversationHistory.push({ role: 'user', content: userContent });
+    conversationHistory.push({ role: 'assistant', content: response });
+    showChatInput();
+
+    // 追蹤：第一次 AI 回應
+    if (response.includes('【草稿版效益文字】')) {
+      // AI 直接產出草稿（無追問）
+      aiDraftText = extractText(response, '【草稿版效益文字】');
+      trackAiEvalQ = extractEvalQ(response);
+    } else {
+      // AI 有追問缺口
+      trackAiFollowUpQ = response;
+    }
+
+    if (response.includes('【最終版效益文字】')) {
+      aiFinalText = extractText(response, '【最終版效益文字】');
+      setTimeout(() => moveToOutputStep(), 1200);
+    }
+  } else {
+    document.getElementById('chatError').classList.add('show');
+  }
+}
+
+async function sendUserMessage() {
+  const input = document.getElementById('chatInput');
+  const msg = input.value.trim();
+  if (!msg || isWaiting) return;
+  input.value = '';
+  input.style.height = 'auto';
+  addUserMessage(msg);
+  conversationHistory.push({ role: 'user', content: msg });
+
+  // 追蹤老師的回答屬於哪個階段
+  const isFollowUpPhase = !aiDraftText; // 草稿還沒產出 → 還在追問階段
+  if (isFollowUpPhase) {
+    trackUserFollowUpA = msg;
+  } else {
+    trackUserEvalA = msg;
+  }
+
+  showTyping();
+  isWaiting = true;
+  document.getElementById('chatSendBtn').disabled = true;
+
+  const response = await callAI(getSystemPrompt(), null, conversationHistory);
+  hideTyping();
+  isWaiting = false;
+  document.getElementById('chatSendBtn').disabled = false;
+
+  if (response) {
+    addAIMessage(response);
+    conversationHistory.push({ role: 'assistant', content: response });
+
+    // 追蹤：後續 AI 回應
+    if (response.includes('【草稿版效益文字】') && !aiDraftText) {
+      aiDraftText = extractText(response, '【草稿版效益文字】');
+      trackAiEvalQ = extractEvalQ(response);
+    }
+    if (response.includes('【最終版效益文字】')) {
+      aiFinalText = extractText(response, '【最終版效益文字】');
+      setTimeout(() => moveToOutputStep(), 1200);
+    }
+  } else {
+    document.getElementById('chatError').classList.add('show');
+  }
+}
+
+// 從 AI 回應中取出評估問題部分（草稿之後的文字）
+function extractEvalQ(text) {
+  const marker = '【草稿版效益文字】';
+  const idx = text.indexOf(marker);
+  if (idx === -1) return '';
+  // 草稿內容結束後的部分即為評估問題
+  const afterDraft = text.substring(idx + marker.length);
+  // 找到條列成果結尾（最後一個「•」行之後）
+  const lines = afterDraft.split('\n');
+  let pastBullets = false;
+  let evalLines = [];
+  for (const line of lines) {
+    if (line.trim().startsWith('•')) { pastBullets = true; continue; }
+    if (pastBullets && line.trim() !== '') evalLines.push(line);
+  }
+  return evalLines.join('\n').trim();
+}
+
+function extractText(text, marker) {
+  const idx = text.indexOf(marker);
+  return idx !== -1 ? text.substring(idx + marker.length).trim() : text.trim();
+}
+
+function moveToOutputStep() {
+  if (!aiFinalText) {
+    // 嘗試取草稿版
+    for (let i = conversationHistory.length - 1; i >= 0; i--) {
+      const c = conversationHistory[i];
+      if (c.role === 'assistant' && c.content.includes('【草稿版效益文字】')) {
+        aiFinalText = extractText(c.content, '【草稿版效益文字】');
+        // 去除評估問題部分（取到第一個空行結束的正文段落）
+        break;
+      }
+    }
+  }
+  document.getElementById('aiOutputContent').textContent = aiFinalText;
+  document.getElementById('editContent').value = aiFinalText;
+  goStep(4);
+}
+
+// ══════════════════════════════════════════
+// API（Gemini）
+// ══════════════════════════════════════════
+async function callAI(systemPrompt, firstMsg, history) {
+  try {
+    // 將對話歷史轉換成 Gemini 格式
+    let contents = [];
+
+    if (history && history.length > 0) {
+      // 多輪對話：把 system prompt 加在第一則 user 訊息前面
+      history.forEach((msg, idx) => {
+        if (msg.role === 'user') {
+          const text = idx === 0 ? systemPrompt + '\n\n' + msg.content : msg.content;
+          contents.push({ role: 'user', parts: [{ text }] });
+        } else if (msg.role === 'assistant') {
+          contents.push({ role: 'model', parts: [{ text: msg.content }] });
+        }
+      });
+    } else {
+      // 第一次呼叫：system prompt + 使用者資料合併
+      contents = [{ role: 'user', parts: [{ text: systemPrompt + '\n\n' + firstMsg }] }];
+    }
+
+    const endpoint = `https://generativelanguage.googleapis.com/v1beta/models/${GEMINI_MODEL}:generateContent?key=${API_KEY}`;
+
+    const res = await fetch(endpoint, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        contents,
+        generationConfig: {
+          maxOutputTokens: 3000,
+          temperature: 0.7
+        }
+      })
+    });
+
+    if (!res.ok) {
+      const err = await res.json();
+      console.error('Gemini API error:', err);
+      throw new Error(res.status);
+    }
+
+    const data = await res.json();
+    return data.candidates[0].content.parts[0].text;
+
+  } catch (e) {
+    console.error('callAI error:', e);
+    return null;
+  }
+}
+
+function getSystemPrompt() {
+  return `你是一位協助人文社會科學研究計畫主持人撰寫「研究效益與影響」的專業助理。你的目標是根據老師提供的計畫資訊，引導他們說清楚研究的真實價值與影響力，並產出一段結構完整、語意流暢的效益文字。語氣應親切、專業、不讓人有壓力。
+
+## 台灣人社學界生態背景知識
+學術發表：TSSCI、THCI、SSCI、A&HCI；各學會研討會（台灣社會學會、台灣史研究學會等）；專書、合著。
+社會影響：公視、關鍵評論網、報導者、天下雜誌、遠見雜誌；國立教育廣播電台、Podcast；TEDx、社區大學演講、國科會人文沙龍、中研院OPEN HOUSE；獲獎。
+政策影響：出席立法、行政、監察等單位公聽會；擔任行政院各部會諮詢委員或主管；承接政府委託研究。
+合作對象：中研院、國史館；故宮博物院、國立臺灣歷史博物館、國立臺灣文學館、C-LAB、各縣市文化局；各縣市教育局、中小學、社區大學；地方文史工作室、社區發展協會、原住民族部落組織。
+基礎建設型研究：台灣文獻叢刊、方志彙編、古文書整理；數位典藏計畫；耆老口述歷史訪談影音建檔；原住民族語語料庫；台灣古地圖數位化；文化資產普查登錄。
+
+## 績效架構（僅供內部判斷，不直接呈現給老師）
+構面一：研究專業——學術產出與影響力、專業聲望與貢獻、研究議題與方法創新
+構面二：社會連結——教育與人才培育、公共傳播與科普、研究能量擴散、公共政策與社會影響力、技術發展與產經價值
+構面三：跨域鏈結——跨學科協作、與實務界合作、國際合作與交流
+三層次：產出（Output）→ 效益（Outcome）→ 影響（Impact）
+
+## 研究類型與效益重點對應（根據老師選擇的類型調整引導重點）
+- A純基礎研究：引導重點放在學術貢獻（理論創新、典範影響）
+- B應用導向基礎研究：兼顧學術深度與社會連結
+- C純應用研究：重點在實務影響、受益對象、跨域合作
+- D基礎建設型研究：重點在「這些資料讓誰可以做什麼原本做不到的研究」
+
+## 工作流程
+
+### 第一步：分析缺口
+老師提供計畫名稱、學門、研究類型、摘要、補充資料後，對照三大構面判斷哪些已有資訊、哪些缺漏。
+
+### 第二步：追問（如有必要）
+有明顯缺漏才追問，最多3題，用日常語言，每題附1-2句台灣語境範例句。像對話不像問卷。優先順序：社會影響→合作資訊→長遠影響。資訊足夠則直接跳第三步。
+
+### 第三步：產出【草稿版效益文字】
+格式：先一段敘事（3-5句），再條列關鍵成果（3-6點，「•」開頭）。
+語氣主動有力，不重複「本研究」超過2次，用台灣正式機構名稱。
+條列成果涵蓋Output、Outcome、Impact三層次，有數字用數字。
+開頭標示「【草稿版效益文字】」。
+
+### 第四步：動態評估問題（2-3題）
+草稿後立即根據此計畫特性產生評估問題：多場域→問整合或分場域；數字是推算→問準確性；質化影響→問描述是否符合實際；核心詮釋不確定→問重點定位。
+說：「請用文字告訴我您的想法，如果整體符合期待，直接說『可以』就好。」
+
+### 第五步：產出【最終版效益文字】
+根據老師回饋修訂。老師說「可以」則草稿即為最終版。開頭標示「【最終版效益文字】」。
+
+## 注意事項
+- 不主動告訴老師三大構面名稱
+- D型研究特別追問「這些資料讓誰可以做什麼原本做不到的事」
+- 人文學科接受質化描述但要具體；社會科學留意政策影響；應用型留意實務推廣
+- 語感像台灣學術社群的人在說話，不像翻譯自英文的報告
+- 全程老師最多回應兩次（補充缺口＋確認草稿）`;
+}
+
+// ══════════════════════════════════════════
+// UI 工具
+// ══════════════════════════════════════════
+function addAIMessage(text) {
+  const msgs = document.getElementById('chatMessages');
+  const div = document.createElement('div');
+  div.className = 'msg ai';
+  div.innerHTML = `<div class="msg-avatar">🤖</div><div class="msg-bubble">${formatMsg(text)}</div>`;
+  msgs.appendChild(div);
+  msgs.scrollTop = msgs.scrollHeight;
+}
+
+function addUserMessage(text) {
+  const msgs = document.getElementById('chatMessages');
+  const div = document.createElement('div');
+  div.className = 'msg user';
+  div.innerHTML = `<div class="msg-avatar">您</div><div class="msg-bubble">${esc(text).replace(/\n/g,'<br>')}</div>`;
+  msgs.appendChild(div);
+  msgs.scrollTop = msgs.scrollHeight;
+}
+
+function showTyping() {
+  const msgs = document.getElementById('chatMessages');
+  const div = document.createElement('div');
+  div.className = 'msg ai'; div.id = 'typingInd';
+  div.innerHTML = `<div class="msg-avatar">🤖</div><div class="typing-indicator"><div class="typing-dot"></div><div class="typing-dot"></div><div class="typing-dot"></div></div>`;
+  msgs.appendChild(div);
+  msgs.scrollTop = msgs.scrollHeight;
+}
+
+function hideTyping() {
+  const el = document.getElementById('typingInd');
+  if (el) el.remove();
+}
+
+function showChatInput() {
+  document.getElementById('chatInputArea').style.display = 'flex';
+}
+
+function formatMsg(text) {
+  return esc(text)
+    .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
+    .replace(/【(.*?)】/g, '<strong>【$1】</strong>')
+    .replace(/\n/g, '<br>');
+}
+
+function esc(t) {
+  return t.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+}
+
+function updateWordCount(id, countId) {
+  const val = document.getElementById(id).value;
+  const el = document.getElementById(countId);
+  el.textContent = val.replace(/\s/g,'').length + ' 字';
+  el.style.display = 'block';
+}
+
+function autoResizeTextarea(el) {
+  el.style.height = 'auto';
+  el.style.height = Math.min(el.scrollHeight, 140) + 'px';
+}
+
+function toggleEdit() {
+  const area = document.getElementById('editContent');
+  const btn = document.getElementById('editToggleBtn');
+  const countEl = document.getElementById('editCount');
+  if (area.classList.contains('show')) {
+    area.classList.remove('show');
+    countEl.style.display = 'none';
+    btn.textContent = '✏️ 點此編輯修改';
+  } else {
+    area.classList.add('show');
+    countEl.style.display = 'block';
+    updateWordCount('editContent','editCount');
+    btn.textContent = '✕ 收起編輯區';
+    area.focus();
+  }
+}
+
+function copyOutput() {
+  const edited = document.getElementById('editContent').value.trim();
+  const text = edited || document.getElementById('aiOutputContent').textContent.trim();
+  navigator.clipboard.writeText(text).then(() => toast('已複製到剪貼板！'));
+}
+
+function copyFinalOutput() {
+  navigator.clipboard.writeText(document.getElementById('finalOutputDisplay').textContent.trim()).then(() => toast('已複製！'));
+}
+
+function toast(msg) {
+  const t = document.createElement('div');
+  t.textContent = msg;
+  t.style.cssText = 'position:fixed;bottom:24px;right:24px;background:#1a3a5c;color:#fff;padding:10px 18px;border-radius:8px;font-size:0.85rem;z-index:999';
+  document.body.appendChild(t);
+  setTimeout(() => t.remove(), 2200);
+}
+
+function toggleEmailInput(show) {
+  document.getElementById('emailWrap').classList.toggle('show', show);
+}
+
+async function submitAll() {
+  const emailOpt = document.querySelector('input[name="emailOpt"]:checked')?.value;
+  const surveyOpt = document.querySelector('input[name="surveyOpt"]:checked')?.value;
+  const email = document.getElementById('userEmail').value.trim();
+  if (emailOpt === 'yes' && !email) { alert('請填寫您的 Email'); return; }
+
+  const editedText = document.getElementById('editContent').value.trim();
+  const finalText = editedText || aiFinalText;
+
+  // 最終送出存檔
+  await saveProgress('已送出');
+
+  // 顯示完成頁
+  document.getElementById('finalOutputDisplay').textContent = finalText;
+  if (surveyOpt === 'yes') document.getElementById('surveyLinkCard').style.display = 'block';
+
+  goStep(6);
+  document.querySelectorAll('.prog-step').forEach(p => p.classList.add('done'));
+}
+</script>
+</body>
+</html>
