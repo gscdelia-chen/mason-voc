@@ -521,7 +521,7 @@
     </div>
     <div style="display:flex; flex-direction:column; align-items:flex-end; gap:4px; flex-shrink:0">
       <span class="header-badge">Beta 試填版</span>
-      <span style="font-size:0.68rem; color:rgba(255,255,255,0.55); letter-spacing:0.04em">v3.3 ｜ 2026-05-26</span>
+      <span style="font-size:0.68rem; color:rgba(255,255,255,0.55); letter-spacing:0.04em">v3.6 ｜ 2026-05-26</span>
     </div>
   </div>
 </header>
@@ -530,7 +530,7 @@
   <div class="progress-inner">
     <div class="prog-step active" id="prog1"><div class="prog-num">1</div><div class="prog-label">基本資料</div></div>
     <div class="prog-step" id="prog2"><div class="prog-num">2</div><div class="prog-label">計畫摘要</div></div>
-    <div class="prog-step" id="prog3"><div class="prog-num">3</div><div class="prog-label">AI 引導對話</div></div>
+    <div class="prog-step" id="prog3"><div class="prog-num">3</div><div class="prog-label">引導對話</div></div>
     <div class="prog-step" id="prog4"><div class="prog-num">4</div><div class="prog-label">效益文字</div></div>
     <div class="prog-step" id="prog5"><div class="prog-num">5</div><div class="prog-label">完成送出</div></div>
   </div>
@@ -662,7 +662,7 @@
 <div class="section" id="step3">
   <div class="section-header">
     <div class="section-label">步驟三 / 五</div>
-    <h2 class="section-title">AI 引導對話</h2>
+    <h2 class="section-title">引導對話</h2>
     <p class="section-desc">AI 正在分析您的計畫資料，判斷是否需要補充說明。請依提示回答，完成後將產出效益文字草稿。</p>
   </div>
 
@@ -1360,11 +1360,35 @@ function getSystemPrompt() {
 
 ## 工作流程
 
-### 第一步：分析缺口
-老師提供計畫名稱、學門、研究類型、摘要、補充資料後，對照三大構面判斷哪些已有資訊、哪些缺漏。
+### 第一步：分析缺口（內部動作，不告知老師）
+老師提供計畫名稱、學門、研究類型、摘要、補充資料後，直接在三大構面中進行比對判斷，不要對老師說「我先幫您分析」、「我進行缺口分析」或任何類似的說明。直接進入第二步。
 
-### 第二步：追問（如有必要）
-有明顯缺漏才追問，最多3題，用日常語言，每題附1-2句台灣語境範例句。像對話不像問卷。優先順序：社會影響→合作資訊→長遠影響。資訊足夠則直接跳第三步。
+### 第二步：追問（如有必要，依研究類型調整方向）
+有明顯缺漏才追問，最多3題，用日常語言，每題附1-2句台灣語境範例句。像對話不像問卷。資訊足夠則直接跳第三步。
+
+**依研究類型決定追問重點與優先順序：**
+
+A｜純基礎研究
+優先追問：學術產出（論文、專書、研討會發表）→ 學術影響（被引用、典範影響）→ 跨學科交流
+不優先追問：人才培育、社會傳播、政策影響（除非老師摘要中有明確提到）
+
+B｜應用導向基礎研究
+優先追問：學術產出 → 社會或政策影響（研究如何回應實際問題）→ 跨域合作
+人才培育可酌情追問，但非優先
+
+C｜純應用研究
+優先追問：實務影響（解決了什麼問題、誰受益、發生什麼改變）→ 跨域合作（與政府、機構、企業的合作）→ 推廣成果
+不優先追問：學術理論貢獻、人才培育
+
+D｜基礎建設型研究
+優先追問：資料使用情形（這些資料讓誰可以做什麼原本做不到的研究）→ 已有哪些機構或學者使用 → 資料的完整性與開放程度
+不優先追問：人才培育、社會傳播
+
+**複選類型時：** 依老師選擇的主要類型為準，兼顧次要類型的核心追問項目。
+
+**通用原則：**
+- 人才培育只有在老師摘要中明確提到，或研究類型為 B/C 且確實有培育學生或辦理工作坊時，才納入追問
+- 不要為了「填滿三大構面」而硬問與計畫性質不符的面向
 
 ### 第三步：產出【草稿版效益文字】
 格式：先一段敘事（3-5句），再條列關鍵成果（3-6點，「•」開頭）。
@@ -1388,7 +1412,8 @@ function getSystemPrompt() {
 - 提到政府機關或補助單位時，一律使用「國科會」，不使用「科技部」
 - 避免使用「長期影響力」、「長遠影響」等說法，因本工具用於單一專題計畫結案，應聚焦在計畫執行期間內的具體成果與效益
 - 產出效益文字後，不要說「祝申請順利」、「研究成果豐碩」或任何祝賀語，也不要說「您可以直接複製貼入計畫書」之類的話
-- 條列關鍵成果時，每點用「•」開頭純文字呈現，不使用任何 Markdown 語法（不用 **粗體**、不用 ## 標題、不用 --- 分隔線）`;
+- 條列關鍵成果時，每點用「•」開頭純文字呈現，不使用任何 Markdown 語法（不用 **粗體**、不用 ## 標題、不用 --- 分隔線）
+- 本工具提供的內容僅供參考，與計畫審查無直接關係。嚴禁出現任何與「審查」相關的用語，例如「為了讓這份計畫在國科會的審查中脫穎而出」、「強化審查委員的印象」、「有利於審查」等說法`;
 }
 
 // ══════════════════════════════════════════
