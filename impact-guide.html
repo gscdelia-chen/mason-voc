@@ -521,7 +521,7 @@
     </div>
     <div style="display:flex; flex-direction:column; align-items:flex-end; gap:4px; flex-shrink:0">
       <span class="header-badge">Beta 試填版</span>
-      <span style="font-size:0.68rem; color:rgba(255,255,255,0.55); letter-spacing:0.04em">v3.6 ｜ 2026-05-26</span>
+      <span style="font-size:0.68rem; color:rgba(255,255,255,0.55); letter-spacing:0.04em">v3.7 ｜ 2026-05-27</span>
     </div>
   </div>
 </header>
@@ -1198,8 +1198,10 @@ ${supplement ? '\n補充資料：\n' + supplement : ''}`.trim();
       // AI 直接產出草稿（無追問）
       aiDraftText = extractText(response, '【草稿版效益文字】');
       trackAiEvalQ = extractEvalQ(response);
+      // 存檔：草稿產出
+      saveProgress('Step3草稿完成');
     } else {
-      // AI 有追問缺口
+      // AI 有追問缺口，記錄追問內容
       trackAiFollowUpQ = response;
     }
 
@@ -1246,6 +1248,8 @@ async function sendUserMessage() {
     if (response.includes('【草稿版效益文字】') && !aiDraftText) {
       aiDraftText = extractText(response, '【草稿版效益文字】');
       trackAiEvalQ = extractEvalQ(response);
+      // 存檔：草稿產出
+      saveProgress('Step3草稿完成');
     }
     if (response.includes('【最終版效益文字】')) {
       aiFinalText = extractText(response, '【最終版效益文字】');
@@ -1256,21 +1260,42 @@ async function sendUserMessage() {
   }
 }
 
-// 從 AI 回應中取出評估問題部分（草稿之後的文字）
+// 從 AI 回應中取出評估問題部分
+// 草稿標記之後、最終版標記之前的文字即為評估問題
 function extractEvalQ(text) {
-  const marker = '【草稿版效益文字】';
-  const idx = text.indexOf(marker);
-  if (idx === -1) return '';
-  // 草稿內容結束後的部分即為評估問題
-  const afterDraft = text.substring(idx + marker.length);
-  // 找到條列成果結尾（最後一個「•」行之後）
-  const lines = afterDraft.split('\n');
-  let pastBullets = false;
+  const draftMarker = '【草稿版效益文字】';
+  const finalMarker = '【最終版效益文字】';
+
+  const draftIdx = text.indexOf(draftMarker);
+  if (draftIdx === -1) return '';
+
+  const afterDraft = text.substring(draftIdx + draftMarker.length);
+
+  // 如果同一段回應裡有最終版，取草稿到最終版之間的文字
+  const finalIdx = afterDraft.indexOf(finalMarker);
+  const evalSection = finalIdx !== -1
+    ? afterDraft.substring(0, finalIdx)
+    : afterDraft;
+
+  // 去除純條列成果的部分（以「•」開頭的行），取後面的評估問題
+  const lines = evalSection.split('\n');
+  let pastContent = false;
   let evalLines = [];
   for (const line of lines) {
-    if (line.trim().startsWith('•')) { pastBullets = true; continue; }
-    if (pastBullets && line.trim() !== '') evalLines.push(line);
+    if (line.trim().startsWith('•')) { pastContent = true; continue; }
+    if (pastContent || (!line.trim().startsWith('•') && evalLines.length > 0)) {
+      if (line.trim() !== '') evalLines.push(line.trim());
+    }
   }
+
+  // 若上述方式取不到，直接取草稿後半段非空文字
+  if (evalLines.length === 0) {
+    const allLines = evalSection.split('\n').filter(l => l.trim() !== '');
+    // 跳過前面屬於敘事段和條列的部分（通常佔前60%），取後面部分
+    const startIdx = Math.floor(allLines.length * 0.6);
+    evalLines = allLines.slice(startIdx);
+  }
+
   return evalLines.join('\n').trim();
 }
 
