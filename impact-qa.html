@@ -1,0 +1,993 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>人社計畫效益撰寫小幫手</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Noto+Serif+TC:wght@300;400;600;700&family=Noto+Sans+TC:wght@300;400;500;600&display=swap');
+
+  :root {
+    --navy: #1a3a5c; --blue: #2563a8; --blue-light: #dbeafe; --blue-mid: #93c5fd;
+    --teal: #0d6e6e; --teal-light: #ccfbf1; --slate: #475569;
+    --white: #ffffff; --border: #e2e8f0; --shadow: 0 4px 24px rgba(26,58,92,0.10);
+    --radius: 12px;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'Noto Sans TC', sans-serif; background: #f8fafc; color: #1e293b; min-height: 100vh; }
+
+  /* Header */
+  header { background: linear-gradient(135deg, var(--navy) 0%, #1e4d7b 60%, var(--teal) 100%); padding: 24px 40px; position: sticky; top: 0; z-index: 100; box-shadow: 0 2px 16px rgba(26,58,92,0.20); }
+  .header-inner { max-width: 860px; margin: 0 auto; display: flex; align-items: center; justify-content: space-between; gap: 20px; }
+  .logo-block h1 { font-family: 'Noto Serif TC', serif; font-size: 1.15rem; font-weight: 700; color: #fff; letter-spacing: 0.04em; }
+  .logo-block p { font-size: 0.75rem; color: rgba(255,255,255,0.65); margin-top: 2px; }
+  .header-badge { background: rgba(255,255,255,0.15); border: 1px solid rgba(255,255,255,0.25); color: rgba(255,255,255,0.9); padding: 4px 12px; border-radius: 20px; font-size: 0.72rem; font-weight: 500; white-space: nowrap; }
+
+  /* Progress */
+  .progress-wrap { background: var(--white); border-bottom: 1px solid var(--border); padding: 0 40px; }
+  .progress-inner { max-width: 860px; margin: 0 auto; display: flex; }
+  .prog-step { flex: 1; display: flex; align-items: center; gap: 8px; padding: 12px 8px; border-bottom: 3px solid transparent; transition: all 0.3s; }
+  .prog-step.active { border-bottom-color: var(--blue); }
+  .prog-step.done { border-bottom-color: var(--teal); }
+  .prog-num { width: 24px; height: 24px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 0.72rem; font-weight: 700; background: var(--border); color: var(--slate); flex-shrink: 0; transition: all 0.3s; }
+  .prog-step.active .prog-num { background: var(--blue); color: #fff; }
+  .prog-step.done .prog-num { background: var(--teal); color: #fff; }
+  .prog-label { font-size: 0.75rem; color: var(--slate); font-weight: 500; }
+  .prog-step.active .prog-label { color: var(--blue); font-weight: 600; }
+  .prog-step.done .prog-label { color: var(--teal); }
+
+  /* Main */
+  main { max-width: 860px; margin: 0 auto; padding: 36px 40px 80px; }
+  .section { display: none; }
+  .section.visible { display: block; animation: fadeIn 0.35s ease; }
+  @keyframes fadeIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+
+  .section-header { margin-bottom: 28px; }
+  .section-label { font-size: 0.7rem; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase; color: var(--blue); margin-bottom: 6px; }
+  .section-title { font-family: 'Noto Serif TC', serif; font-size: 1.5rem; font-weight: 700; color: var(--navy); line-height: 1.4; }
+  .section-desc { margin-top: 10px; font-size: 0.9rem; color: var(--slate); line-height: 1.8; }
+
+  /* Form */
+  .form-card { background: var(--white); border: 1px solid var(--border); border-radius: var(--radius); padding: 24px 28px; margin-bottom: 20px; box-shadow: var(--shadow); }
+  .field-label { font-size: 0.88rem; font-weight: 600; color: var(--navy); margin-bottom: 6px; display: block; }
+  .field-hint { font-size: 0.8rem; color: var(--slate); margin-bottom: 12px; line-height: 1.6; }
+  input[type="text"], input[type="email"] { width: 100%; border: 1.5px solid var(--border); border-radius: 8px; padding: 10px 13px; font-family: 'Noto Sans TC', sans-serif; font-size: 0.92rem; color: #1e293b; background: #fafbfc; outline: none; transition: border-color 0.2s; }
+  input[type="text"]:focus, input[type="email"]:focus { border-color: var(--blue); box-shadow: 0 0 0 3px rgba(37,99,168,0.10); background: #fff; }
+  textarea { width: 100%; border: 1.5px solid var(--border); border-radius: 8px; padding: 12px 14px; font-family: 'Noto Sans TC', sans-serif; font-size: 0.92rem; line-height: 1.7; color: #1e293b; background: #fafbfc; resize: vertical; outline: none; transition: border-color 0.2s; }
+  textarea:focus { border-color: var(--blue); box-shadow: 0 0 0 3px rgba(37,99,168,0.10); background: #fff; }
+  textarea::placeholder, input::placeholder { color: #b0bec5; }
+
+  /* Domain tabs */
+  .domain-tabs { display: flex; gap: 6px; margin-bottom: 16px; flex-wrap: wrap; }
+  .domain-tab { padding: 6px 16px; border-radius: 20px; font-size: 0.8rem; font-weight: 600; cursor: pointer; border: 1.5px solid var(--border); background: #fafbfc; color: var(--slate); transition: all 0.2s; }
+  .domain-tab:hover { border-color: var(--blue-mid); color: var(--navy); }
+  .domain-tab.active { background: var(--navy); border-color: var(--navy); color: #fff; }
+
+  /* Discipline */
+  .disc-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 8px; }
+  .disc-item { display: flex; align-items: center; gap: 10px; padding: 10px 13px; border: 1.5px solid var(--border); border-radius: 8px; cursor: pointer; transition: all 0.2s; background: #fafbfc; user-select: none; }
+  .disc-item:hover { border-color: var(--blue-mid); background: var(--blue-light); }
+  .disc-item.selected { border-color: var(--blue); background: var(--blue-light); }
+  .disc-radio { width: 17px; height: 17px; border: 2px solid #cbd5e1; border-radius: 50%; flex-shrink: 0; display: flex; align-items: center; justify-content: center; transition: all 0.2s; }
+  .disc-item.selected .disc-radio { border-color: var(--blue); background: var(--blue); }
+  .disc-item.selected .disc-radio::after { content: ''; width: 6px; height: 6px; background: #fff; border-radius: 50%; display: block; }
+  .disc-name { font-size: 0.83rem; color: #334155; line-height: 1.4; }
+  .disc-item.selected .disc-name { color: var(--navy); font-weight: 600; }
+  .disc-sub { font-size: 0.72rem; color: #94a3b8; line-height: 1.3; margin-top: 1px; }
+  .selected-disc-display { margin-top: 12px; font-size: 0.82rem; color: var(--teal); font-weight: 600; min-height: 20px; }
+
+  /* Research type */
+  .type-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 10px; }
+  .type-card { border: 1.5px solid var(--border); border-radius: 10px; padding: 14px 16px; cursor: pointer; transition: all 0.2s; background: #fafbfc; }
+  .type-card:hover { border-color: var(--blue-mid); background: var(--blue-light); }
+  .type-card.selected { border-color: var(--blue); background: var(--blue-light); }
+  .type-card-top { display: flex; align-items: flex-start; gap: 10px; margin-bottom: 6px; }
+  .type-check { width: 17px; height: 17px; border: 2px solid #cbd5e1; border-radius: 4px; flex-shrink: 0; margin-top: 2px; display: flex; align-items: center; justify-content: center; transition: all 0.2s; }
+  .type-card.selected .type-check { background: var(--blue); border-color: var(--blue); }
+  .type-card.selected .type-check::after { content: '✓'; font-size: 0.72rem; color: #fff; line-height: 1; }
+  .type-name { font-size: 0.88rem; font-weight: 700; color: var(--navy); line-height: 1.4; }
+  .type-desc { font-size: 0.78rem; color: var(--slate); line-height: 1.6; margin-left: 27px; }
+
+  /* Q&A Cards */
+  .qa-card {
+    background: var(--white);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 20px 24px;
+    margin-bottom: 16px;
+    box-shadow: var(--shadow);
+    transition: border-color 0.2s;
+  }
+  .qa-card:focus-within { border-color: var(--blue); }
+  .qa-card.hidden { display: none; }
+  .qa-num {
+    display: inline-flex; align-items: center; justify-content: center;
+    width: 24px; height: 24px; border-radius: 50%;
+    background: var(--blue); color: #fff;
+    font-size: 0.75rem; font-weight: 700;
+    margin-right: 8px; flex-shrink: 0;
+  }
+  .qa-question {
+    font-size: 0.92rem; font-weight: 600; color: var(--navy);
+    margin-bottom: 12px; display: flex; align-items: flex-start; gap: 4px;
+    line-height: 1.5;
+  }
+  .qa-ai-hint {
+    background: var(--blue-light);
+    border-left: 3px solid var(--blue);
+    border-radius: 0 6px 6px 0;
+    padding: 10px 13px;
+    font-size: 0.82rem;
+    color: #1e4d7b;
+    line-height: 1.65;
+    margin-bottom: 10px;
+  }
+  .qa-ai-hint-label {
+    font-size: 0.68rem;
+    font-weight: 700;
+    color: var(--blue);
+    letter-spacing: 0.08em;
+    margin-bottom: 4px;
+  }
+  .qa-ai-hint.empty {
+    background: #f8fafc;
+    border-left-color: #cbd5e1;
+    color: var(--slate);
+    font-style: italic;
+  }
+  .qa-textarea {
+    width: 100%; min-height: 80px;
+    border: 1.5px solid var(--border); border-radius: 8px;
+    padding: 10px 13px;
+    font-family: 'Noto Sans TC', sans-serif;
+    font-size: 0.88rem; line-height: 1.7; color: #1e293b;
+    background: #fafbfc; resize: vertical; outline: none;
+    transition: border-color 0.2s;
+  }
+  .qa-textarea:focus { border-color: var(--blue); background: #fff; }
+
+  /* Loading overlay for step 3 */
+  .loading-overlay {
+    display: none;
+    background: var(--white);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 32px;
+    text-align: center;
+    margin-bottom: 20px;
+    box-shadow: var(--shadow);
+  }
+  .loading-overlay.show { display: block; }
+  .loading-spinner {
+    display: flex; align-items: center; justify-content: center; gap: 6px;
+    margin-bottom: 12px;
+  }
+  .spinner-dot { width: 8px; height: 8px; background: var(--blue); border-radius: 50%; animation: bounce 1.2s infinite; }
+  .spinner-dot:nth-child(2) { animation-delay: 0.2s; }
+  .spinner-dot:nth-child(3) { animation-delay: 0.4s; }
+  @keyframes bounce { 0%, 60%, 100% { transform: translateY(0); } 30% { transform: translateY(-7px); } }
+  .loading-text { font-size: 0.9rem; color: var(--slate); }
+
+  /* Output */
+  .output-box { background: var(--white); border: 1.5px solid var(--teal); border-radius: var(--radius); padding: 24px 28px; margin-bottom: 20px; box-shadow: 0 4px 20px rgba(13,110,110,0.08); }
+  .output-label { font-size: 0.7rem; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase; color: var(--teal); margin-bottom: 12px; display: flex; align-items: center; gap: 6px; }
+  .output-label::before { content: ''; display: inline-block; width: 6px; height: 6px; background: var(--teal); border-radius: 50%; }
+  .output-content { font-size: 0.92rem; line-height: 1.85; color: #1e293b; white-space: pre-wrap; }
+  .edit-area { width: 100%; min-height: 200px; border: 1.5px solid var(--border); border-radius: 8px; padding: 14px 16px; font-family: 'Noto Sans TC', sans-serif; font-size: 0.92rem; line-height: 1.85; color: #1e293b; background: #fafbfc; resize: vertical; outline: none; transition: border-color 0.2s; display: none; }
+  .edit-area:focus { border-color: var(--blue); background: #fff; }
+  .edit-area.show { display: block; }
+  .edit-toggle { font-size: 0.8rem; color: var(--blue); cursor: pointer; text-decoration: underline; margin-top: 10px; display: inline-block; }
+
+  /* Finish */
+  .finish-card { background: var(--white); border: 1px solid var(--border); border-radius: var(--radius); padding: 24px 28px; margin-bottom: 16px; box-shadow: var(--shadow); }
+  .finish-card h3 { font-family: 'Noto Serif TC', serif; font-size: 1rem; color: var(--navy); margin-bottom: 14px; }
+  .radio-group { display: flex; flex-direction: column; gap: 10px; }
+  .radio-item { display: flex; align-items: flex-start; gap: 10px; cursor: pointer; font-size: 0.88rem; color: #334155; line-height: 1.5; }
+  .radio-item input { margin-top: 2px; flex-shrink: 0; }
+  .email-input-wrap { display: none; margin-top: 12px; }
+  .email-input-wrap.show { display: block; }
+
+  /* Completion */
+  .completion-banner { background: linear-gradient(135deg, var(--teal) 0%, #0a5858 100%); border-radius: var(--radius); padding: 32px 36px; text-align: center; color: #fff; margin-bottom: 24px; }
+  .completion-banner .check { font-size: 2.5rem; margin-bottom: 12px; }
+  .completion-banner h2 { font-family: 'Noto Serif TC', serif; font-size: 1.4rem; font-weight: 700; margin-bottom: 8px; }
+  .completion-banner p { font-size: 0.88rem; opacity: 0.85; line-height: 1.7; }
+
+  /* Buttons */
+  .btn-row { display: flex; gap: 12px; justify-content: flex-end; margin-top: 28px; flex-wrap: wrap; }
+  .btn { padding: 10px 22px; border-radius: 8px; font-family: 'Noto Sans TC', sans-serif; font-size: 0.9rem; font-weight: 600; cursor: pointer; border: none; transition: all 0.2s; }
+  .btn:disabled { opacity: 0.5; cursor: not-allowed; }
+  .btn-primary { background: var(--blue); color: #fff; }
+  .btn-primary:hover:not(:disabled) { background: #1d4e8f; transform: translateY(-1px); box-shadow: 0 4px 12px rgba(37,99,168,0.3); }
+  .btn-secondary { background: var(--white); color: var(--slate); border: 1.5px solid var(--border); }
+  .btn-secondary:hover:not(:disabled) { border-color: var(--blue); color: var(--navy); }
+  .btn-teal { background: var(--teal); color: #fff; }
+  .btn-teal:hover:not(:disabled) { background: #0a5858; transform: translateY(-1px); }
+
+  .word-count { font-size: 0.75rem; color: #94a3b8; text-align: right; margin-top: 4px; }
+  .error-msg { background: #fef2f2; border: 1px solid #fca5a5; border-radius: 8px; padding: 12px 16px; font-size: 0.85rem; color: #991b1b; margin-top: 10px; display: none; }
+  .error-msg.show { display: block; }
+
+  @media (max-width: 640px) {
+    header { padding: 18px 20px; }
+    .progress-wrap { padding: 0 16px; }
+    main { padding: 24px 20px 60px; }
+    .type-grid { grid-template-columns: 1fr; }
+    .disc-grid { grid-template-columns: 1fr 1fr; }
+    .prog-label { display: none; }
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="header-inner">
+    <div class="logo-block">
+      <h1>人社計畫效益撰寫小幫手</h1>
+      <p>國家實驗研究院科技政策與資訊研究中心</p>
+    </div>
+    <div style="display:flex; flex-direction:column; align-items:flex-end; gap:4px; flex-shrink:0">
+      <span class="header-badge">Beta 試填版</span>
+      <span style="font-size:0.68rem; color:rgba(255,255,255,0.55); letter-spacing:0.04em">v1.0 ｜ 2026-05-27</span>
+    </div>
+  </div>
+</header>
+
+<div class="progress-wrap">
+  <div class="progress-inner">
+    <div class="prog-step active" id="prog1"><div class="prog-num">1</div><div class="prog-label">基本資料</div></div>
+    <div class="prog-step" id="prog2"><div class="prog-num">2</div><div class="prog-label">計畫摘要</div></div>
+    <div class="prog-step" id="prog3"><div class="prog-num">3</div><div class="prog-label">引導問答</div></div>
+    <div class="prog-step" id="prog4"><div class="prog-num">4</div><div class="prog-label">效益文字</div></div>
+    <div class="prog-step" id="prog5"><div class="prog-num">5</div><div class="prog-label">完成送出</div></div>
+  </div>
+</div>
+
+<main>
+
+<!-- STEP 1 -->
+<div class="section visible" id="step1">
+  <div class="section-header">
+    <div class="section-label">步驟一 / 五</div>
+    <h2 class="section-title">基本資料</h2>
+    <p class="section-desc">請填寫計畫名稱，並選擇所屬學門與研究類型，協助系統提供更適切的引導。</p>
+  </div>
+
+  <div class="form-card">
+    <label class="field-label" for="planName">計畫名稱 <span style="color:#e53e3e">*</span></label>
+    <input type="text" id="planName" placeholder="請輸入計畫完整名稱" oninput="checkStep1()">
+  </div>
+
+  <div class="form-card">
+    <label class="field-label">研究學門 <span style="color:#e53e3e">*</span></label>
+    <p class="field-hint">請選擇最符合的學門（單選）</p>
+    <div class="domain-tabs" id="domainTabs">
+      <div class="domain-tab active" onclick="switchDomain('人文')">人文</div>
+      <div class="domain-tab" onclick="switchDomain('社會')">社會</div>
+      <div class="domain-tab" onclick="switchDomain('管理')">管理</div>
+      <div class="domain-tab" onclick="switchDomain('科教')">科教</div>
+      <div class="domain-tab" onclick="switchDomain('其他')">其他</div>
+    </div>
+    <div class="disc-grid" id="discGrid"></div>
+    <div class="selected-disc-display" id="selectedDiscDisplay">尚未選擇學門</div>
+  </div>
+
+  <div class="form-card">
+    <label class="field-label">研究類型 <span style="color:#e53e3e">*</span></label>
+    <p class="field-hint">請選擇最符合的研究類型（可複選）</p>
+    <div class="type-grid">
+      <div class="type-card" onclick="toggleType(this,'A')">
+        <div class="type-card-top"><div class="type-check"></div><div class="type-name">A｜純基礎研究</div></div>
+        <div class="type-desc">以增進對現象的理解、提出新理論或概念為主，不直接考慮應用</div>
+      </div>
+      <div class="type-card" onclick="toggleType(this,'B')">
+        <div class="type-card-top"><div class="type-check"></div><div class="type-name">B｜應用導向基礎研究</div></div>
+        <div class="type-desc">既追求基礎理解，也考慮實際應用價值</div>
+      </div>
+      <div class="type-card" onclick="toggleType(this,'C')">
+        <div class="type-card-top"><div class="type-check"></div><div class="type-name">C｜純應用研究</div></div>
+        <div class="type-desc">以解決特定實務問題為主要目標</div>
+      </div>
+      <div class="type-card" onclick="toggleType(this,'D')">
+        <div class="type-card-top"><div class="type-check"></div><div class="type-name">D｜基礎建設型研究</div></div>
+        <div class="type-desc">系統性建立知識基礎，讓後續研究得以在此基礎上進行</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="btn-row">
+    <button class="btn btn-primary" id="step1Btn" onclick="goStep(2)" disabled>下一步 →</button>
+  </div>
+</div>
+
+<!-- STEP 2 -->
+<div class="section" id="step2">
+  <div class="section-header">
+    <div class="section-label">步驟二 / 五</div>
+    <h2 class="section-title">計畫摘要與成果資料</h2>
+    <p class="section-desc">請貼上或填寫計畫摘要。系統將根據內容自動判斷六個效益面向的答案，供您確認與補充。</p>
+  </div>
+
+  <div class="form-card">
+    <label class="field-label" for="abstract">計畫摘要 <span style="color:#e53e3e">*</span></label>
+    <p class="field-hint">可直接貼上計畫書摘要、結案摘要，或用自己的話描述研究內容與成果。</p>
+    <textarea id="abstract" placeholder="請貼上或填寫計畫摘要……" oninput="updateWordCount('abstract','abstractCount'); checkStep2()" style="min-height:160px"></textarea>
+    <div class="word-count" id="abstractCount">0 字</div>
+  </div>
+
+  <div class="form-card">
+    <label class="field-label" for="supplement">補充資料（選填）</label>
+    <p class="field-hint">如有獲獎紀錄、媒體報導、政策影響、合作機構、學術發表等補充資訊，可填寫於此。</p>
+    <textarea id="supplement" placeholder="例如：本計畫共發表 2 篇 TSSCI 論文、獲得 2023 年 USR 楷模獎……" oninput="updateWordCount('supplement','supplementCount')" style="min-height:100px"></textarea>
+    <div class="word-count" id="supplementCount">0 字</div>
+  </div>
+
+  <div class="btn-row">
+    <button class="btn btn-secondary" onclick="goStep(1)">← 返回</button>
+    <button class="btn btn-primary" id="step2Btn" onclick="startQAGeneration()" disabled>送出，AI 分析摘要 →</button>
+  </div>
+</div>
+
+<!-- STEP 3 -->
+<div class="section" id="step3">
+  <div class="section-header">
+    <div class="section-label">步驟三 / 五</div>
+    <h2 class="section-title">引導問答</h2>
+    <p class="section-desc">系統已根據您的摘要，自動判斷以下六個效益面向的答案。請確認內容是否正確，並視需要補充或修改。</p>
+  </div>
+
+  <!-- AI 分析中 loading -->
+  <div class="loading-overlay" id="loadingOverlay">
+    <div class="loading-spinner">
+      <div class="spinner-dot"></div>
+      <div class="spinner-dot"></div>
+      <div class="spinner-dot"></div>
+    </div>
+    <div class="loading-text">AI 正在分析您的計畫摘要，請稍候……</div>
+  </div>
+
+  <!-- 六個問答卡片 -->
+  <div id="qaSection" style="display:none">
+    <div class="info-box" style="background:#f0fdf4; border-left-color:#059669; color:#14532d; margin-bottom:20px; padding:13px 16px; border-radius:0 8px 8px 0; font-size:0.86rem; line-height:1.7;">
+      以下是 AI 根據您的摘要預先填入的內容。<strong>藍色框</strong>為 AI 的判斷，下方文字框為您的最終版本，請直接修改或補充。若 AI 未能判斷的題目，請自行填寫。
+    </div>
+
+    <!-- Q1 -->
+    <div class="qa-card" id="qa1">
+      <div class="qa-question"><span class="qa-num">1</span><span id="q1-text"></span></div>
+      <div class="qa-ai-hint" id="q1-ai"><div class="qa-ai-hint-label">AI 判斷</div><div id="q1-ai-content"></div></div>
+      <textarea class="qa-textarea" id="q1-answer" placeholder="請確認或補充您的回答…"></textarea>
+    </div>
+
+    <!-- Q2 -->
+    <div class="qa-card" id="qa2">
+      <div class="qa-question"><span class="qa-num">2</span><span id="q2-text"></span></div>
+      <div class="qa-ai-hint" id="q2-ai"><div class="qa-ai-hint-label">AI 判斷</div><div id="q2-ai-content"></div></div>
+      <textarea class="qa-textarea" id="q2-answer" placeholder="請確認或補充您的回答…"></textarea>
+    </div>
+
+    <!-- Q3 -->
+    <div class="qa-card" id="qa3">
+      <div class="qa-question"><span class="qa-num">3</span><span id="q3-text"></span></div>
+      <div class="qa-ai-hint" id="q3-ai"><div class="qa-ai-hint-label">AI 判斷</div><div id="q3-ai-content"></div></div>
+      <textarea class="qa-textarea" id="q3-answer" placeholder="請確認或補充您的回答…"></textarea>
+    </div>
+
+    <!-- Q4 -->
+    <div class="qa-card" id="qa4">
+      <div class="qa-question"><span class="qa-num">4</span><span id="q4-text"></span></div>
+      <div class="qa-ai-hint" id="q4-ai"><div class="qa-ai-hint-label">AI 判斷</div><div id="q4-ai-content"></div></div>
+      <textarea class="qa-textarea" id="q4-answer" placeholder="請確認或補充您的回答…"></textarea>
+    </div>
+
+    <!-- Q5 -->
+    <div class="qa-card" id="qa5">
+      <div class="qa-question"><span class="qa-num">5</span><span id="q5-text"></span></div>
+      <div class="qa-ai-hint" id="q5-ai"><div class="qa-ai-hint-label">AI 判斷</div><div id="q5-ai-content"></div></div>
+      <textarea class="qa-textarea" id="q5-answer" placeholder="請確認或補充您的回答…"></textarea>
+    </div>
+
+    <!-- Q6 -->
+    <div class="qa-card" id="qa6">
+      <div class="qa-question"><span class="qa-num">6</span><span id="q6-text"></span></div>
+      <div class="qa-ai-hint" id="q6-ai"><div class="qa-ai-hint-label">AI 判斷</div><div id="q6-ai-content"></div></div>
+      <textarea class="qa-textarea" id="q6-answer" placeholder="請確認或補充您的回答…"></textarea>
+    </div>
+
+    <div class="error-msg" id="qaError">AI 服務暫時無法連線，請稍後再試。</div>
+
+    <div class="btn-row">
+      <button class="btn btn-secondary" onclick="goStep(2)">← 返回修改摘要</button>
+      <button class="btn btn-primary" onclick="generateImpactText()">產出效益文字 →</button>
+    </div>
+  </div>
+</div>
+
+<!-- STEP 4 -->
+<div class="section" id="step4">
+  <div class="section-header">
+    <div class="section-label">步驟四 / 五</div>
+    <h2 class="section-title">效益文字</h2>
+    <p class="section-desc">以下是 AI 根據您填答的內容產出的效益文字。您可以直接使用，或點選「編輯修改」進行調整。</p>
+  </div>
+
+  <div class="output-box">
+    <div class="output-label">AI 產出版本</div>
+    <div class="output-content" id="aiOutputContent">（效益文字將顯示於此）</div>
+  </div>
+
+  <div class="form-card">
+    <div class="field-label">您的版本</div>
+    <p class="field-hint">如需修改，請直接在下方編輯。</p>
+    <div class="edit-toggle" id="editToggleBtn" onclick="toggleEdit()">✏️ 點此編輯修改</div>
+    <textarea class="edit-area" id="editContent" oninput="updateWordCount('editContent','editCount')"></textarea>
+    <div class="word-count" id="editCount" style="display:none"></div>
+  </div>
+
+  <div class="btn-row">
+    <button class="btn btn-secondary" onclick="goStep(3)">← 返回問答</button>
+    <button class="btn btn-teal" onclick="copyOutput()">📋 複製效益文字</button>
+    <button class="btn btn-primary" onclick="goStep(5)">下一步 →</button>
+  </div>
+</div>
+
+<!-- STEP 5 -->
+<div class="section" id="step5">
+  <div class="section-header">
+    <div class="section-label">步驟五 / 五</div>
+    <h2 class="section-title">完成送出</h2>
+    <p class="section-desc">請選擇是否需要將填答內容回寄給自己，以及是否願意參與研究回饋問卷。</p>
+  </div>
+
+  <div class="finish-card">
+    <h3>📧 是否將填答內容寄給自己？</h3>
+    <div class="radio-group">
+      <label class="radio-item">
+        <input type="radio" name="emailOpt" value="yes" onchange="toggleEmailInput(true)">
+        <span>是，請將效益文字與所有填答紀錄寄給我</span>
+      </label>
+      <label class="radio-item">
+        <input type="radio" name="emailOpt" value="no" onchange="toggleEmailInput(false)" checked>
+        <span>否，不需要</span>
+      </label>
+    </div>
+    <div class="email-input-wrap" id="emailWrap">
+      <label class="field-label" style="font-size:0.82rem; margin-top:4px">您的 Email：</label>
+      <input type="email" id="userEmail" placeholder="請輸入您的 Email">
+    </div>
+  </div>
+
+  <div class="finish-card">
+    <h3>📝 是否願意參與問卷回饋？</h3>
+    <p style="font-size:0.85rem; color:var(--slate); margin-bottom:14px; line-height:1.7">本系統目前處於研究蒐集資料階段，您的回饋將協助我們改善工具設計。問卷約需 3-5 分鐘。</p>
+    <div class="radio-group">
+      <label class="radio-item"><input type="radio" name="surveyOpt" value="yes"><span>是，願意參與問卷回饋</span></label>
+      <label class="radio-item"><input type="radio" name="surveyOpt" value="no" checked><span>否，不參與</span></label>
+    </div>
+  </div>
+
+  <div class="btn-row">
+    <button class="btn btn-secondary" onclick="goStep(4)">← 返回修改</button>
+    <button class="btn btn-primary" onclick="submitAll()">完成送出 ✓</button>
+  </div>
+</div>
+
+<!-- STEP 6 -->
+<div class="section" id="step6">
+  <div class="completion-banner">
+    <div class="check">✦</div>
+    <h2>感謝您的參與</h2>
+    <p>您的填答已成功送出。<br>如您選擇回寄，效益文字與填答紀錄將寄送至您的信箱。</p>
+  </div>
+
+  <div style="background:#fef9ec; border-left:4px solid #d97706; border-radius:0 8px 8px 0; padding:13px 16px; margin-bottom:20px; font-size:0.86rem; color:#78350f; line-height:1.7;">
+    本工具旨在協助您撰寫效益說明。產出的文字僅供參考，您可視需求彈性運用（例如調整後納入期末報告）。引用或貼出前，請務必再次審閱與把關，以確保內容的準確性。
+  </div>
+
+  <div class="finish-card" id="surveyLinkCard" style="display:none">
+    <h3>📝 問卷連結</h3>
+    <p style="font-size:0.86rem; color:var(--slate); line-height:1.7; margin-bottom:16px">感謝您願意提供回饋！請點選下方連結填寫問卷，約需 3-5 分鐘。</p>
+    <a href="SURVEY_LINK_HERE" target="_blank" class="btn btn-teal" style="display:inline-block; text-decoration:none">前往填寫問卷 →</a>
+  </div>
+
+  <div class="output-box" style="margin-top:20px">
+    <div class="output-label">您的效益文字（可再次複製）</div>
+    <div class="output-content" id="finalOutputDisplay"></div>
+  </div>
+  <div class="btn-row">
+    <button class="btn btn-teal" onclick="copyFinalOutput()">📋 複製效益文字</button>
+  </div>
+</div>
+
+</main>
+
+<script>
+// ══════════════════════════════════════════
+// 學門資料（同 impact-guide）
+// ══════════════════════════════════════════
+const DOMAINS = {
+  '人文': [
+    { id: '文學一', name: '文學一', sub: '中國文學、台灣文學、原住民文學等' },
+    { id: '文學二', name: '文學二', sub: '外國文學' },
+    { id: '語言學', name: '語言學', sub: '' },
+    { id: '哲學', name: '哲學', sub: '' },
+    { id: '歷史學', name: '歷史學', sub: '' },
+    { id: '藝術學', name: '藝術學', sub: '' },
+  ],
+  '社會': [
+    { id: '社會學及社福社工', name: '社會學及社福社工', sub: '含傳播學' },
+    { id: '人類學及族群研究', name: '人類學及族群研究', sub: '含客家研究、原住民研究' },
+    { id: '心理學', name: '心理學', sub: '' },
+    { id: '教育學', name: '教育學', sub: '含體育學及圖書資訊學' },
+    { id: '法律學', name: '法律學', sub: '' },
+    { id: '政治學', name: '政治學', sub: '' },
+    { id: '經濟學', name: '經濟學', sub: '' },
+  ],
+  '管理': [
+    { id: '管理學一', name: '管理學一', sub: '' },
+    { id: '管理學二', name: '管理學二', sub: '' },
+    { id: '財金及會計', name: '財金及會計', sub: '' },
+    { id: '區域研究', name: '區域研究', sub: '' },
+  ],
+  '科教': [
+    { id: '科教研究', name: '科教研究', sub: '含數學教育、科學教育、資訊教育、應用科學教育、醫學教育、科技社會與傳播、科學教育實作' },
+  ],
+  '其他': [
+    { id: '其他', name: '其他', sub: '含新興、跨域' },
+  ]
+};
+
+// 六個問句（依研究類型動態調整）
+const BASE_QUESTIONS = {
+  q1: '這個計畫的核心研究問題是什麼？主要的研究方法或取徑為何？',
+  q2: '計畫執行期間產生了哪些具體成果？（如論文、報告、資料庫、展覽、政策建議等）',
+  q3: '這些成果有沒有被其他人引用、採用，或在學術以外的場合被用到？',
+  q4: '這個研究有沒有影響到特定群體或社群？他們是誰？發生了什麼變化？',
+  q5: '有沒有促成任何合作——跨校、跨領域、跨機構，或國際合作？',
+  q6: '這個計畫對您的學科領域，或更廣的社會，帶來了什麼貢獻？'
+};
+
+// 各研究類型的問句調整與取捨
+const TYPE_QUESTION_OVERRIDE = {
+  A: {
+    q4: null, // 純基礎研究不問「影響的群體」
+    q6: '這個計畫在學術上帶來了什麼理論或方法上的貢獻？對您所在的學科有什麼推進？'
+  },
+  B: {
+    q6: '這個計畫在學術上與社會實踐上各帶來了什麼貢獻？'
+  },
+  C: {
+    q1: '這個計畫要解決什麼實際問題？主要的介入方式或執行方法為何？',
+    q6: '這個計畫幫助了哪些人或機構？解決了什麼問題？留下了什麼改變？'
+  },
+  D: {
+    q3: '目前有哪些學者、機構或研究計畫在使用您建置的資料或成果？',
+    q4: null, // 基礎建設型不問「影響的群體」
+    q6: '這些資料或基礎建設讓後續研究者可以做什麼原本做不到的研究或工作？'
+  }
+};
+
+// ══════════════════════════════════════════
+// 狀態變數
+// ══════════════════════════════════════════
+let selectedDisc = '';
+let selectedTypes = [];
+let currentDomain = '人文';
+let aiFinalText = '';
+let aiPrefilledAnswers = {}; // AI 預填的六題答案
+let activeQuestions = {};    // 實際顯示的問句（依研究類型取捨後）
+const SESSION_ID = 'qa_' + Date.now() + '_' + Math.random().toString(36).substring(2, 7);
+const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzuk0Zk-27S2tUVpUMbtnwzceHLk6lA9Q0jkF8zqU_k8jiL-FMEeulx_v46TXUcoA3b/exec';
+
+// ══════════════════════════════════════════
+// 初始化
+// ══════════════════════════════════════════
+window.onload = () => switchDomain('人文');
+
+// ══════════════════════════════════════════
+// 學門切換
+// ══════════════════════════════════════════
+function switchDomain(domain) {
+  currentDomain = domain;
+  document.querySelectorAll('.domain-tab').forEach(t => {
+    t.classList.toggle('active', t.textContent === domain);
+  });
+  const grid = document.getElementById('discGrid');
+  const discs = DOMAINS[domain] || [];
+  grid.innerHTML = discs.map(d => `
+    <div class="disc-item ${selectedDisc === d.id ? 'selected' : ''}" onclick="selectDisc('${d.id}')">
+      <div class="disc-radio"></div>
+      <div>
+        <div class="disc-name">${d.name}</div>
+        ${d.sub ? `<div class="disc-sub">${d.sub}</div>` : ''}
+      </div>
+    </div>
+  `).join('');
+}
+
+function selectDisc(id) {
+  selectedDisc = id;
+  document.querySelectorAll('.disc-item').forEach(el => {
+    el.classList.toggle('selected', el.querySelector('.disc-name').textContent === id);
+  });
+  let dispName = id;
+  for (const d of Object.values(DOMAINS)) {
+    const found = d.find(x => x.id === id);
+    if (found) { dispName = found.sub ? `${found.name}（${found.sub}）` : found.name; break; }
+  }
+  document.getElementById('selectedDiscDisplay').textContent = '✓ 已選擇：' + dispName;
+  checkStep1();
+}
+
+function toggleType(el, type) {
+  el.classList.toggle('selected');
+  if (el.classList.contains('selected')) {
+    if (!selectedTypes.includes(type)) selectedTypes.push(type);
+  } else {
+    selectedTypes = selectedTypes.filter(t => t !== type);
+  }
+  checkStep1();
+}
+
+// ══════════════════════════════════════════
+// 問句取捨（依研究類型）
+// ══════════════════════════════════════════
+function buildActiveQuestions() {
+  const questions = { ...BASE_QUESTIONS };
+  // 依研究類型覆蓋或移除問句
+  for (const type of selectedTypes) {
+    const overrides = TYPE_QUESTION_OVERRIDE[type] || {};
+    for (const [key, val] of Object.entries(overrides)) {
+      if (val === null) {
+        delete questions[key]; // 移除此題
+      } else {
+        questions[key] = val; // 覆蓋問句
+      }
+    }
+  }
+  return questions;
+}
+
+// ══════════════════════════════════════════
+// Step 3：AI 分析摘要並預填六題
+// ══════════════════════════════════════════
+async function startQAGeneration() {
+  goStep(3);
+  document.getElementById('loadingOverlay').classList.add('show');
+  document.getElementById('qaSection').style.display = 'none';
+
+  // 建立此次的問句清單
+  activeQuestions = buildActiveQuestions();
+
+  const planName = document.getElementById('planName').value.trim();
+  const abstract = document.getElementById('abstract').value.trim();
+  const supplement = document.getElementById('supplement').value.trim();
+
+  let discFullName = selectedDisc;
+  for (const d of Object.values(DOMAINS)) {
+    const found = d.find(x => x.id === selectedDisc);
+    if (found) { discFullName = found.sub ? `${found.name}（${found.sub}）` : found.name; break; }
+  }
+  const typeLabel = selectedTypes.map(t => ({
+    A:'純基礎研究', B:'應用導向基礎研究', C:'純應用研究', D:'基礎建設型研究'
+  }[t])).join('、');
+
+  // 組合問句清單給 AI
+  const questionList = Object.entries(activeQuestions)
+    .map(([key, q], idx) => `${idx + 1}. [${key}] ${q}`)
+    .join('\n');
+
+  const prompt = `你是一位協助人文社會科學研究計畫主持人撰寫「研究效益與影響」的專業助理。
+
+請根據以下計畫資訊，針對每個問題判斷摘要中是否有相關內容，並用**繁體中文**預填答案。
+
+計畫名稱：${planName}
+研究學門：${discFullName}
+研究類型：${typeLabel}
+
+計畫摘要：
+${abstract}
+${supplement ? '\n補充資料：\n' + supplement : ''}
+
+請針對以下每個問題，從摘要中找出相關內容並整理成簡潔的回答（2-4句）。
+如果摘要中完全沒有相關資訊，請回答「摘要中未提及，請老師補充」。
+
+問題清單：
+${questionList}
+
+請以 JSON 格式回應，格式如下（key 對應問題編號如 q1、q2 等）：
+{
+  "q1": "預填內容",
+  "q2": "預填內容",
+  ...
+}
+
+只回傳 JSON，不要有其他文字。`;
+
+  const response = await callAI(prompt);
+
+  document.getElementById('loadingOverlay').classList.remove('show');
+
+  if (response) {
+    try {
+      // 解析 AI 回傳的 JSON
+      const cleaned = response.replace(/```json|```/g, '').trim();
+      aiPrefilledAnswers = JSON.parse(cleaned);
+    } catch (e) {
+      console.error('JSON 解析失敗：', e, response);
+      aiPrefilledAnswers = {};
+    }
+    renderQACards();
+    document.getElementById('qaSection').style.display = 'block';
+    saveProgress('Step2完成');
+  } else {
+    document.getElementById('qaError').classList.add('show');
+    document.getElementById('qaSection').style.display = 'block';
+    renderQACards();
+  }
+}
+
+function renderQACards() {
+  const qKeys = ['q1','q2','q3','q4','q5','q6'];
+  let visibleIdx = 1;
+
+  qKeys.forEach((key, i) => {
+    const card = document.getElementById(`qa${i+1}`);
+    const qText = document.getElementById(`q${i+1}-text`);
+    const aiHint = document.getElementById(`q${i+1}-ai`);
+    const aiContent = document.getElementById(`q${i+1}-ai-content`);
+    const answer = document.getElementById(`q${i+1}-answer`);
+
+    if (activeQuestions[key]) {
+      // 此題顯示
+      card.classList.remove('hidden');
+      // 更新題號
+      card.querySelector('.qa-num').textContent = visibleIdx++;
+      // 填入問句
+      qText.textContent = activeQuestions[key];
+      // 填入 AI 預填答案
+      const prefilled = aiPrefilledAnswers[key] || '';
+      if (prefilled && !prefilled.includes('未提及')) {
+        aiContent.textContent = prefilled;
+        aiHint.classList.remove('empty');
+        answer.value = prefilled; // 預設與 AI 一致，老師可修改
+      } else {
+        aiContent.textContent = prefilled || '摘要中未提及，請補充說明';
+        aiHint.classList.add('empty');
+        answer.value = '';
+      }
+    } else {
+      // 此題隱藏
+      card.classList.add('hidden');
+      answer.value = '（本研究類型不適用）';
+    }
+  });
+}
+
+// ══════════════════════════════════════════
+// Step 4：產出效益文字
+// ══════════════════════════════════════════
+async function generateImpactText() {
+  // 收集老師最終版答案
+  const finalAnswers = {};
+  ['q1','q2','q3','q4','q5','q6'].forEach((key, i) => {
+    const answer = document.getElementById(`q${i+1}-answer`).value.trim();
+    if (activeQuestions[key] && answer && !answer.includes('不適用')) {
+      finalAnswers[key] = { question: activeQuestions[key], answer };
+    }
+  });
+
+  const qaText = Object.entries(finalAnswers)
+    .map(([key, {question, answer}]) => `問：${question}\n答：${answer}`)
+    .join('\n\n');
+
+  let discFullName = selectedDisc;
+  for (const d of Object.values(DOMAINS)) {
+    const found = d.find(x => x.id === selectedDisc);
+    if (found) { discFullName = found.sub ? `${found.name}（${found.sub}）` : found.name; break; }
+  }
+  const typeLabel = selectedTypes.map(t => ({
+    A:'純基礎研究', B:'應用導向基礎研究', C:'純應用研究', D:'基礎建設型研究'
+  }[t])).join('、');
+
+  const prompt = `你是一位協助人文社會科學研究計畫主持人撰寫「研究效益與影響」的專業助理。
+
+請根據以下問答內容，產出一段結構完整、語意流暢的效益文字。
+
+計畫學門：${discFullName}
+研究類型：${typeLabel}
+
+問答內容：
+${qaText}
+
+請依以下格式產出：
+1. 先寫一段敘事（3-5句），語氣主動有力，說明研究的核心貢獻與影響
+2. 再條列關鍵成果（3-6點），每點用「•」開頭，純文字不使用 Markdown
+
+注意事項：
+- 不要出現「本研究」超過2次
+- 使用台灣正式機構名稱（如 TSSCI、文化部、國科會）
+- 不使用「科技部」，一律用「國科會」
+- 不說「祝申請順利」或任何祝賀語
+- 不說「您可以複製貼入計畫書」
+- 不使用「長期影響力」等說法，聚焦計畫執行期間的具體成果
+- 不使用任何與「審查」相關的用語
+- 條列成果不使用 Markdown 語法（不用**粗體**、不用##標題）`;
+
+  // 顯示 loading
+  document.getElementById('aiOutputContent').textContent = '正在產出效益文字，請稍候……';
+  goStep(4);
+
+  const response = await callAI(prompt);
+
+  if (response) {
+    aiFinalText = response.trim();
+    document.getElementById('aiOutputContent').textContent = aiFinalText;
+    document.getElementById('editContent').value = aiFinalText;
+    saveProgress('Step3完成');
+  } else {
+    document.getElementById('aiOutputContent').textContent = '效益文字產出失敗，請返回重試。';
+  }
+}
+
+// ══════════════════════════════════════════
+// API 呼叫（透過 Apps Script 代理）
+// ══════════════════════════════════════════
+async function callAI(promptText) {
+  try {
+    const contents = [{ role: 'user', parts: [{ text: promptText }] }];
+    const res = await fetch(APPS_SCRIPT_URL, {
+      method: 'POST',
+      headers: { 'Content-Type': 'text/plain' },
+      body: JSON.stringify({ type: 'ai', contents })
+    });
+    if (!res.ok) throw new Error(res.status);
+    const data = await res.json();
+    if (data.status !== 'success') throw new Error(data.message);
+    return data.text;
+  } catch (e) {
+    console.error('callAI error:', e);
+    return null;
+  }
+}
+
+// ══════════════════════════════════════════
+// 步驟切換
+// ══════════════════════════════════════════
+function goStep(n) {
+  document.querySelectorAll('.section').forEach(s => s.classList.remove('visible'));
+  document.querySelectorAll('.prog-step').forEach((p, i) => {
+    p.classList.remove('active','done');
+    if (i + 1 < n) p.classList.add('done');
+    if (i + 1 === n) p.classList.add('active');
+  });
+  const t = document.getElementById('step' + n);
+  if (t) t.classList.add('visible');
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+  const statusMap = { 2: 'Step1完成', 5: 'Step4完成' };
+  if (statusMap[n]) saveProgress(statusMap[n]);
+}
+
+// ══════════════════════════════════════════
+// 存檔
+// ══════════════════════════════════════════
+async function saveProgress(status) {
+  if (!APPS_SCRIPT_URL || APPS_SCRIPT_URL === 'YOUR_APPS_SCRIPT_URL_HERE') return;
+
+  let discFullName = selectedDisc;
+  for (const d of Object.values(DOMAINS)) {
+    const found = d.find(x => x.id === selectedDisc);
+    if (found) { discFullName = found.sub ? `${found.name}（${found.sub}）` : found.name; break; }
+  }
+  const typeLabel = selectedTypes.map(t => ({
+    A:'純基礎研究', B:'應用導向基礎研究', C:'純應用研究', D:'基礎建設型研究'
+  }[t])).join('、');
+
+  const getVal = (id) => { const el = document.getElementById(id); return el ? el.value.trim() : ''; };
+
+  const payload = {
+    source: 'impact-qa', // 標識來源，Apps Script 用來判斷寫入哪個分頁
+    sessionId: SESSION_ID,
+    status,
+    planName: getVal('planName'),
+    discipline: discFullName,
+    researchTypes: typeLabel,
+    abstract: getVal('abstract'),
+    supplement: getVal('supplement'),
+    q1_ai: aiPrefilledAnswers['q1'] || '',
+    q1_final: getVal('q1-answer'),
+    q2_ai: aiPrefilledAnswers['q2'] || '',
+    q2_final: getVal('q2-answer'),
+    q3_ai: aiPrefilledAnswers['q3'] || '',
+    q3_final: getVal('q3-answer'),
+    q4_ai: aiPrefilledAnswers['q4'] || '',
+    q4_final: getVal('q4-answer'),
+    q5_ai: aiPrefilledAnswers['q5'] || '',
+    q5_final: getVal('q5-answer'),
+    q6_ai: aiPrefilledAnswers['q6'] || '',
+    q6_final: getVal('q6-answer'),
+    aiFinalText: aiFinalText,
+    userEditedText: getVal('editContent'),
+    email: getVal('userEmail'),
+    surveyConsent: document.querySelector('input[name="surveyOpt"]:checked')?.value === 'yes' ? '是' : ''
+  };
+
+  try {
+    await fetch(APPS_SCRIPT_URL, {
+      method: 'POST',
+      mode: 'no-cors',
+      headers: { 'Content-Type': 'text/plain' },
+      body: JSON.stringify(payload)
+    });
+    console.log('saveProgress 送出成功：', status);
+  } catch (err) {
+    console.error('saveProgress 失敗：', err);
+  }
+}
+
+// ══════════════════════════════════════════
+// 完成送出
+// ══════════════════════════════════════════
+async function submitAll() {
+  const emailOpt = document.querySelector('input[name="emailOpt"]:checked')?.value;
+  const surveyOpt = document.querySelector('input[name="surveyOpt"]:checked')?.value;
+  const email = document.getElementById('userEmail').value.trim();
+  if (emailOpt === 'yes' && !email) { alert('請填寫您的 Email'); return; }
+
+  const finalText = document.getElementById('editContent').value.trim() || aiFinalText;
+  await saveProgress('已送出');
+
+  document.getElementById('finalOutputDisplay').textContent = finalText;
+  if (surveyOpt === 'yes') document.getElementById('surveyLinkCard').style.display = 'block';
+  goStep(6);
+  document.querySelectorAll('.prog-step').forEach(p => p.classList.add('done'));
+}
+
+// ══════════════════════════════════════════
+// UI 工具
+// ══════════════════════════════════════════
+function checkStep1() {
+  const name = document.getElementById('planName').value.trim();
+  document.getElementById('step1Btn').disabled = !(name && selectedDisc && selectedTypes.length > 0);
+}
+function checkStep2() {
+  document.getElementById('step2Btn').disabled = document.getElementById('abstract').value.trim().length < 20;
+}
+function updateWordCount(id, countId) {
+  const el = document.getElementById(countId);
+  el.textContent = document.getElementById(id).value.replace(/\s/g,'').length + ' 字';
+  el.style.display = 'block';
+}
+function toggleEdit() {
+  const area = document.getElementById('editContent');
+  const btn = document.getElementById('editToggleBtn');
+  const countEl = document.getElementById('editCount');
+  if (area.classList.contains('show')) {
+    area.classList.remove('show'); countEl.style.display = 'none';
+    btn.textContent = '✏️ 點此編輯修改';
+  } else {
+    area.classList.add('show'); countEl.style.display = 'block';
+    updateWordCount('editContent','editCount');
+    btn.textContent = '✕ 收起編輯區'; area.focus();
+  }
+}
+function copyOutput() {
+  const text = document.getElementById('editContent').value.trim() || document.getElementById('aiOutputContent').textContent.trim();
+  navigator.clipboard.writeText(text).then(() => toast('已複製到剪貼板！'));
+}
+function copyFinalOutput() {
+  navigator.clipboard.writeText(document.getElementById('finalOutputDisplay').textContent.trim()).then(() => toast('已複製！'));
+}
+function toast(msg) {
+  const t = document.createElement('div');
+  t.textContent = msg;
+  t.style.cssText = 'position:fixed;bottom:24px;right:24px;background:#1a3a5c;color:#fff;padding:10px 18px;border-radius:8px;font-size:0.85rem;z-index:999';
+  document.body.appendChild(t);
+  setTimeout(() => t.remove(), 2200);
+}
+function toggleEmailInput(show) {
+  document.getElementById('emailWrap').classList.toggle('show', show);
+}
+</script>
+</body>
+</html>
